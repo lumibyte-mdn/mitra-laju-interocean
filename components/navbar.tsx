@@ -1,10 +1,15 @@
+"use client"
+
 import Image from "next/image"
 import Link from "next/link"
 
-import avatar from "@/public/svg/Avatar.svg"
 import Logo from "@/public/svg/logo.svg"
+import { UserButton, useUser } from "@clerk/nextjs"
+import { useRouter } from "next/navigation"
 
 export default function NavigasiBar() {
+    const { user } = useUser()
+
     return (
         <>
             <div className="bg-white flex justify-between items-center px-4">
@@ -46,20 +51,11 @@ export default function NavigasiBar() {
                     </div>
                 </div>
                 <div className="flex items-center gap-4">
-                    <div className="flex flex-col text-end">
-                        <p className="font-[family-name:var(--font-inter)] font-semibold">Suherman</p>
-                        <p className="font-[family-name:var(--font-inter)] text-xs">Admin</p>
+                    <div className="text-right">
+                        <h3 className="font-semibold">{`${user?.firstName} ${user?.lastName}`}</h3>
+                        <p className="text-xs">{`${user?.emailAddresses}`}</p>
                     </div>
-                    <Link
-                        href={""}
-                    >
-                        <Image
-                            src={avatar}
-                            alt=""
-                            width={44}
-                            height={44}
-                        />
-                    </Link>
+                    <UserButton />
                 </div>
             </div>
         </>
