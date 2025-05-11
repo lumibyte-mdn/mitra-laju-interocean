@@ -35,7 +35,7 @@ const menuItems = [
                 },
                 {
                     icon: "/svg/profile.svg",
-                    label: "Profile",
+                    label: "Users",
                     href: "/"
                 },
                 {
