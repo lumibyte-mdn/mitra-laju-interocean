@@ -29,19 +29,9 @@ const menuItems = [
         items:
             [
                 {
-                    icon: "/svg/settings.svg",
-                    label: "Pengaturan",
-                    href: "/"
-                },
-                {
                     icon: "/svg/profile.svg",
                     label: "Users",
-                    href: "/"
-                },
-                {
-                    icon: "/svg/logout.svg",
-                    label: "Keluar",
-                    href: "/"
+                    href: "/users"
                 },
             ]
     }
