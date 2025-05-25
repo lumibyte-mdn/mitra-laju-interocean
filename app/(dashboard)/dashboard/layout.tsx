@@ -16,7 +16,7 @@ export default function DashboardLayout({
                     <NavigasiBar />
                 </div>
             </div>
-            <div className="w-4/5 bg-slate-100 pt-20 overflow-auto">
+            <div className="w-4/5 bg-slate-100 pt-16 overflow-auto">
                 {children}
             </div>
         </div>
