@@ -1,7 +1,6 @@
 const role = [
-    { id: "0", ukuran: "Admin" },
-    { id: "1", ukuran: "Karyawan" },
-    { id: "2", ukuran: "HRD" },
+    { id: "0", role: "Admin", value: "ADMIN" },
+    { id: "1", role: "Karyawan", value: "KARYAWAN" },
 ];
 
 

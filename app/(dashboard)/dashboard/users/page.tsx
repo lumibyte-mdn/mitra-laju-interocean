@@ -1,16 +1,16 @@
 'use client';
 
-import users from "@/lib/user";
-import Link from "next/link";
-
-import { useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 
 import { Dialog, DialogBackdrop, DialogPanel, DialogTitle, Listbox, ListboxButton, ListboxOption, ListboxOptions } from '@headlessui/react'
 import { CheckIcon, ChevronUpDownIcon, ExclamationTriangleIcon, EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline'
+
+import Link from "next/link";
 import role from "@/lib/role";
 
+
 export default function userPage() {
-    const USERS = users
+    const [users, setUsers] = useState([])
     const [open, setOpen] = useState(false)
 
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -18,6 +18,67 @@ export default function userPage() {
 
     const [showPassword, setShowPassword] = useState(false);
     const [selectedRole, setSelectedRole] = useState(role[0]);
+
+    useEffect(() => {
+        fetchUsers();
+    }, [])
+
+    /**
+     * This function fetches all of the users
+     * 
+     * @returns - none
+     */
+    const fetchUsers = async (): Promise<void> => {
+        try {
+            const res = await fetch("/api/users")
+
+            if (!res.ok) {
+                throw new Error("Failed to fetch data.")
+            }
+
+            const data = await res.json()
+
+            if (data.success) {
+                setUsers(data.users)
+            }
+        } catch (err) {
+            console.log(err)
+        }
+    }
+
+    /**
+     * This function handles the submission of
+     * new user data input by user with ADMIN role
+     * 
+     * @param e 
+     * @returns - none
+     */
+    const handleSubmit = async (e: FormEvent<HTMLFormElement>): Promise<void> => {
+        e.preventDefault()
+
+        const formData = new FormData(e.currentTarget)
+
+        formData.append("role", selectedRole.value)
+
+        try {
+            const res = await fetch("/api/users", {
+                method: "POST",
+                body: formData
+            })
+
+            if (!res.ok) {
+                throw new Error("Failed to submit data.")
+            }
+
+            const data = await res.json()
+
+            if (data.success) {
+                location.reload()
+            }
+        } catch (err) {
+            console.log(err)
+        }
+    }
 
     return (
         <>
@@ -57,14 +118,14 @@ export default function userPage() {
                                         </Link>
                                     </div>
 
-                                    {/* dialog tambah*/}
+                                    {/* Form Add User */}
                                     <Dialog open={open} onClose={setOpen} className="relative z-50">
                                         <DialogBackdrop
                                             transition
                                             className="fixed inset-0 bg-gray-500/75 transition-opacity data-closed:opacity-0 data-enter:duration-300 data-enter:ease-out data-leave:duration-200 data-leave:ease-in"
                                         />
 
-                                        <div className="fixed inset-0 z-10 w-screen overflow-y-auto">
+                                        <form className="fixed inset-0 z-10 w-screen overflow-y-auto" onSubmit={handleSubmit}>
                                             <div className="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
                                                 <DialogPanel
                                                     transition
@@ -85,13 +146,13 @@ export default function userPage() {
 
                                                                 <div className="flex mt-8 justify-between gap-3">
                                                                     <div className="w-1/2">
-                                                                        <label htmlFor="namadepan" className="block text-sm/6 font-medium text-gray-900">
+                                                                        <label htmlFor="firstName" className="block text-sm/6 font-medium text-gray-900">
                                                                             Nama Depan
                                                                         </label>
                                                                         <div className="mt-1">
                                                                             <input
-                                                                                id="namadepan"
-                                                                                name="namadepan"
+                                                                                id="firstName"
+                                                                                name="firstName"
                                                                                 type="text"
                                                                                 placeholder="Nama Depan"
                                                                                 className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-[#1A5098] sm:text-sm/6"
@@ -100,13 +161,13 @@ export default function userPage() {
                                                                     </div>
 
                                                                     <div className="w-1/2">
-                                                                        <label htmlFor="namabelakang" className="block text-sm/6 font-medium text-gray-900">
+                                                                        <label htmlFor="lastName" className="block text-sm/6 font-medium text-gray-900">
                                                                             Nama Belakang
                                                                         </label>
                                                                         <div className="mt-1">
                                                                             <input
-                                                                                id="namabelakang"
-                                                                                name="namabelakang"
+                                                                                id="lastName"
+                                                                                name="lastName"
                                                                                 type="text"
                                                                                 placeholder="Nama Belakang"
                                                                                 className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-[#1A5098] sm:text-sm/6"
@@ -164,7 +225,7 @@ export default function userPage() {
                                                                     <Listbox value={selectedRole} onChange={setSelectedRole}>
                                                                         <div className="relative mt-2">
                                                                             <ListboxButton className="grid w-full cursor-default grid-cols-1 rounded-md bg-white py-1.5 pr-2 pl-3 text-left text-gray-900 outline-1 -outline-offset-1 outline-gray-300 focus:outline-2 focus:-outline-offset-2 focus:outline-[#1A5098] sm:text-sm/6">
-                                                                                <span className="col-start-1 row-start-1 truncate pr-6">{selectedRole?.ukuran}</span>
+                                                                                <span className="col-start-1 row-start-1 truncate pr-6">{selectedRole?.role}</span>
                                                                                 <ChevronUpDownIcon
                                                                                     aria-hidden="true"
                                                                                     className="col-start-1 row-start-1 size-5 self-center justify-self-end text-gray-500 sm:size-4"
@@ -181,7 +242,7 @@ export default function userPage() {
                                                                                         value={role}
                                                                                         className="group relative cursor-default py-2 pr-9 pl-3 text-gray-900 select-none data-focus:bg-[#1A5098] data-focus:text-white data-focus:outline-hidden"
                                                                                     >
-                                                                                        <span className="block truncate font-normal group-data-selected:font-semibold">{role.ukuran}</span>
+                                                                                        <span className="block truncate font-normal group-data-selected:font-semibold">{role.role}</span>
 
                                                                                         <span className="absolute inset-y-0 right-0 flex items-center pr-4 text-[#1A5098] group-not-data-selected:hidden group-data-focus:text-white">
                                                                                             <CheckIcon aria-hidden="true" className="size-5" />
@@ -197,7 +258,7 @@ export default function userPage() {
                                                     </div>
                                                     <div className="bg-gray-50 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6 mt-6 rounded-b-lg">
                                                         <button
-                                                            type="button"
+                                                            type="submit"
                                                             onClick={() => setOpen(false)}
                                                             className="inline-flex w-full justify-center rounded-md bg-[#1A5098] px-3 py-2 text-sm font-semibold text-white shadow-xs hover:bg-[#1a5198eb] sm:ml-3 sm:w-auto"
                                                         >
@@ -214,7 +275,7 @@ export default function userPage() {
                                                     </div>
                                                 </DialogPanel>
                                             </div>
-                                        </div>
+                                        </form>
                                     </Dialog>
                                 </div>
                             </div>
@@ -240,13 +301,13 @@ export default function userPage() {
                                             </tr>
                                         </thead>
                                         <tbody className="divide-y divide-gray-200 bg-white">
-                                            {USERS.map((user) =>
-                                                <tr key={user.id}>
+                                            {/* {users.map((user, index) =>
+                                                <tr key={index}>
                                                     <td
                                                         className="w-full max-w-0 py-4 pr-3 pl-4 text-sm font-medium text-gray-900 sm:w-auto sm:max-w-none sm:pl-0">
-                                                        {user.namadepan}
+                                                        {user.firstName}
                                                         <dl className="font-normal lg:hidden">
-                                                            <dd className="mt-1 truncate text-gray-700">{user.namabelakang}</dd>
+                                                            <dd className="mt-1 truncate text-gray-700">{user.lastName}</dd>
                                                             <dt className="sr-only sm:hidden">Email</dt>
                                                             <dd className="mt-1 truncate text-gray-500 sm:hidden">{user.email}</dd>
                                                         </dl>
@@ -283,7 +344,7 @@ export default function userPage() {
                                                         </div>
                                                     </td>
                                                 </tr>
-                                            )}
+                                            )} */}
                                         </tbody>
                                     </table>
 
