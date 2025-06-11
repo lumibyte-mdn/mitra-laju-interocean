@@ -5,8 +5,9 @@ import Link from "next/link";
 
 import { useState } from "react";
 
-import { Dialog, DialogBackdrop, DialogPanel, DialogTitle } from '@headlessui/react'
-import { ChevronDownIcon, ExclamationTriangleIcon, EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline'
+import { Dialog, DialogBackdrop, DialogPanel, DialogTitle, Listbox, ListboxButton, ListboxOption, ListboxOptions } from '@headlessui/react'
+import { CheckIcon, ChevronUpDownIcon, ExclamationTriangleIcon, EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline'
+import role from "@/lib/role";
 
 export default function userPage() {
     const USERS = users
@@ -16,6 +17,7 @@ export default function userPage() {
     const [selectedUserId, setSelectedUserId] = useState<number | null>(null)
 
     const [showPassword, setShowPassword] = useState(false);
+    const [selectedRole, setSelectedRole] = useState(role[0]);
 
     return (
         <>
@@ -66,9 +68,9 @@ export default function userPage() {
                                             <div className="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
                                                 <DialogPanel
                                                     transition
-                                                    className="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all data-closed:translate-y-4 data-closed:opacity-0 data-enter:duration-300 data-enter:ease-out data-leave:duration-200 data-leave:ease-in sm:my-8 sm:w-full sm:max-w-lg data-closed:sm:translate-y-0 data-closed:sm:scale-95"
+                                                    className="relative transform overflow-visible rounded-lg bg-white text-left shadow-xl transition-all data-closed:translate-y-4 data-closed:opacity-0 data-enter:duration-300 data-enter:ease-out data-leave:duration-200 data-leave:ease-in sm:my-8 sm:w-full sm:max-w-lg data-closed:sm:translate-y-0 data-closed:sm:scale-95 isolation-isolate"
                                                 >
-                                                    <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                                                    <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4 rounded-lg">
                                                         <div className="sm:flex-col sm:items-start">
                                                             <div className="mt-3 text-center sm:mt-0 mx-2 sm:text-left">
                                                                 <DialogTitle as="h3" className="text-base font-semibold text-gray-900">
@@ -159,32 +161,41 @@ export default function userPage() {
                                                                     <label htmlFor="role" className="block text-sm/6 font-medium text-gray-900">
                                                                         Role
                                                                     </label>
-                                                                    <div className="mt-1">
-                                                                        <div>
-                                                                            <div className="grid shrink-0 grid-cols-1 focus-within:relative">
-                                                                                <select
-                                                                                    id="role"
-                                                                                    name="role"
-                                                                                    aria-label="role"
-                                                                                    className="block w-full rounded-md col-start-1 row-start-1 outline-1 appearance-none py-1.5 pr-7 pl-3 text-base text-gray-900 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-[#1A5098]
-                                                                                sm:text-sm/6"
-                                                                                >
-                                                                                    <option>Admin</option>
-                                                                                    <option>Karyawan</option>
-                                                                                    <option>HRD</option>
-                                                                                </select>
-                                                                                <ChevronDownIcon
+                                                                    <Listbox value={selectedRole} onChange={setSelectedRole}>
+                                                                        <div className="relative mt-2">
+                                                                            <ListboxButton className="grid w-full cursor-default grid-cols-1 rounded-md bg-white py-1.5 pr-2 pl-3 text-left text-gray-900 outline-1 -outline-offset-1 outline-gray-300 focus:outline-2 focus:-outline-offset-2 focus:outline-[#1A5098] sm:text-sm/6">
+                                                                                <span className="col-start-1 row-start-1 truncate pr-6">{selectedRole?.ukuran}</span>
+                                                                                <ChevronUpDownIcon
                                                                                     aria-hidden="true"
-                                                                                    className="pointer-events-none col-start-1 row-start-1 mr-2 size-5 self-center justify-self-end text-gray-500 sm:size-4"
+                                                                                    className="col-start-1 row-start-1 size-5 self-center justify-self-end text-gray-500 sm:size-4"
                                                                                 />
-                                                                            </div>
+                                                                            </ListboxButton>
+
+                                                                            <ListboxOptions
+                                                                                transition
+                                                                                className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base ring-1 shadow-lg ring-black/5 focus:outline-hidden data-leave:transition data-leave:duration-100 data-leave:ease-in data-closed:data-leave:opacity-0 sm:text-sm"
+                                                                            >
+                                                                                {role.map((role) => (
+                                                                                    <ListboxOption
+                                                                                        key={role.id}
+                                                                                        value={role}
+                                                                                        className="group relative cursor-default py-2 pr-9 pl-3 text-gray-900 select-none data-focus:bg-[#1A5098] data-focus:text-white data-focus:outline-hidden"
+                                                                                    >
+                                                                                        <span className="block truncate font-normal group-data-selected:font-semibold">{role.ukuran}</span>
+
+                                                                                        <span className="absolute inset-y-0 right-0 flex items-center pr-4 text-[#1A5098] group-not-data-selected:hidden group-data-focus:text-white">
+                                                                                            <CheckIcon aria-hidden="true" className="size-5" />
+                                                                                        </span>
+                                                                                    </ListboxOption>
+                                                                                ))}
+                                                                            </ListboxOptions>
                                                                         </div>
-                                                                    </div>
+                                                                    </Listbox>
                                                                 </div>
                                                             </div>
                                                         </div>
                                                     </div>
-                                                    <div className="bg-gray-50 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6 mt-6">
+                                                    <div className="bg-gray-50 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6 mt-6 rounded-b-lg">
                                                         <button
                                                             type="button"
                                                             onClick={() => setOpen(false)}
