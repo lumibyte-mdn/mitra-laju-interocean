@@ -335,7 +335,7 @@ export default function UserPage() {
                                         <tbody className="divide-y divide-gray-200 bg-white">
                                             {
                                                 users.map((user: Users, index) =>
-                                                    <tr key={index}>
+                                                    <tr key={index + 1}>
                                                         <td
                                                             className="w-full max-w-0 py-4 pr-3 pl-4 text-sm font-medium text-gray-900 sm:w-auto sm:max-w-none sm:pl-0">
                                                             {user.firstName}
