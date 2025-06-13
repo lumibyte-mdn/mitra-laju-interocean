@@ -3,11 +3,7 @@ import clerkClient from "@clerk/clerk-sdk-node";
 
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from '@/lib/prisma';
-
-enum UserRole {
-    ADMIN = "ADMIN",
-    KARYAWAN = "KARYAWAN"
-}
+import { UserRole } from "@/lib/interface";
 
 export async function POST(req: NextRequest) {
     const { userId } = await auth()
@@ -17,22 +13,20 @@ export async function POST(req: NextRequest) {
     }
 
     // Check if user has admin role
-    const hasAdminRole = await prisma.users.findUnique({
+    const personalUser = await prisma.users.findUnique({
         where: {
             clerkId: userId
-        }, 
-        select: {
-            role: true
         }
     })
     
-    if (hasAdminRole?.role != "ADMIN") {
-        return NextResponse.json({ message: "Unauthorized action." }, { status: 403 })
+    if (personalUser?.role != "ADMIN") {
+        return NextResponse.json({ message: "You don't have permission to perform this action." }, { status: 400 })
     }
     
     const data = await req.formData()
 
     try {
+        // Create new user in clerk
         const user = await clerkClient.users.createUser({
             firstName: data.get("firstName") as string,
             lastName: data.get("lastName") as string,
@@ -40,7 +34,7 @@ export async function POST(req: NextRequest) {
             password: data.get("password") as string 
         })
         
-        // Insert into internal database
+        // Insert into database
         const createUser = await prisma.users.create({
             data: {
                 clerkId: user.id,
@@ -65,12 +59,60 @@ export async function GET(req: NextRequest) {
         return NextResponse.json({ message: "Unauthenticated user." }, { status: 401 })
     }
 
-    try {
-        const users = await prisma.users.findMany()
+    const personalUser = await prisma.users.findUnique({
+        where: {
+            clerkId: userId
+        }
+    })
 
-        return NextResponse.json({ success: true, users }, { status: 200 })
+    if (personalUser?.role != "ADMIN") {
+        return NextResponse.json({ message: "You don't have permissoin to perform this action." }, { status: 400 })
+    }
+
+    const users = await prisma.users.findMany()
+
+    return NextResponse.json({ success: true, users }, { status: 200 })
+}
+
+export async function DELETE(req: NextRequest) {
+    const { userId } = await auth()
+
+    if (!userId) {
+        return NextResponse.json({ message: "Unauthenticated user." }, { status: 401 })
+    }
+
+    const personalUser = await prisma.users.findUnique({
+        where: {
+            clerkId: userId
+        }
+    })
+
+    if (personalUser?.role != "ADMIN") {
+        return NextResponse.json({ message: "You don't have permissoin to perform this action." }, { status: 400 })
+    }
+
+    const data = await req.json()
+
+    const user = await prisma.users.findUnique({
+        where: {
+            id: data.id
+        },
+        select: {
+            clerkId: true
+        }
+    })
+
+    try {
+        const deleteUser = await prisma.users.delete({
+            where: {
+                id: data.id
+            }
+        })
+
+        await clerkClient.users.deleteUser(user?.clerkId as string)
     } catch (err) {
         console.log(err)
-        return NextResponse.json({ message: "Failed to fetch users." }, { status: 500 })
     }
+
+    return NextResponse.json({ success: true, message: "User deleted successfully" }, { status: 201 })
 }
