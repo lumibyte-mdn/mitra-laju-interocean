@@ -1,6 +1,6 @@
 const roles = [
-    { id: "0", role: "Admin", value: "ADMIN" },
-    { id: "1", role: "Karyawan", value: "KARYAWAN" },
+    { id: "1", role: "Admin", value: "ADMIN" },
+    { id: "2", role: "Karyawan", value: "KARYAWAN" },
 ];
 
 
