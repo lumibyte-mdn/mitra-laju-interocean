@@ -25,7 +25,57 @@ model Users {
   role          UserRole
 }
 
+model Shipments {
+  id                    Int          @id @default(autoincrement())
+
+  orderNumber           String       @unique
+  customer              String
+  shipper               String
+  dueDate               DateTime
+
+  customerCode          String
+  qty                   Int
+  size                  String
+  origin                String
+  destination           String
+  shipmentType          ShipmentType
+  estimatedDate         DateTime
+  containerNumber       String
+  bookingNumber         String
+
+  costing               Costings[]
+}
+
+model Costings {
+  id                    Int           @id @default(autoincrement())
+
+  shipmentId            Int
+  shipment              Shipments     @relation(fields: [shipmentId], references: [id])
+
+  vendorName            String
+  price                 Int
+  currency              Int
+
+  localFee              Int
+  freight               Int
+
+  subCosting            Int
+
+  reimbursement         Int
+
+  vat                   Boolean
+  incomeTax             Boolean
+
+  freightPaymentDate    DateTime
+}
+
 enum UserRole {
   ADMIN
   KARYAWAN
+}
+
+enum ShipmentType {
+  DOMESTIC
+  EXPORT
+  IMPORT
 }

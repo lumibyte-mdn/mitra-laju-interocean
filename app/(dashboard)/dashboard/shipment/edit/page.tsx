@@ -1,14 +1,14 @@
 "use client"
 
-import tipeshipment from "@/lib/tipeshipment";
-import ukuranmenu from "@/lib/ukuranmenu";
+import tipeshipment from "@/lib/shipmentTypes";
+import ukuranmenu from "@/lib/sizes";
 
 import { Listbox, ListboxButton, ListboxOption, ListboxOptions } from "@headlessui/react";
 import { CheckIcon, ChevronUpDownIcon } from "@heroicons/react/16/solid";
 
 import { useEffect, useState } from "react";
 
-export default function shipmentEdit() {
+export default function ShipmentEdit() {
     const [selectedUkuran, setSelectedUkuran] = useState(ukuranmenu[0]);
     const [selectedTipe, setSelectedTipe] = useState(tipeshipment[0]);
     const [selectedTaxes, setSelectedTaxes] = useState<number[]>([]);

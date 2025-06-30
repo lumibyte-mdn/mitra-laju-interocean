@@ -18,11 +18,11 @@ export async function POST(req: NextRequest) {
             clerkId: userId
         }
     })
-    
+
     if (personalUser?.role != "ADMIN") {
         return NextResponse.json({ message: "You don't have permission to perform this action." }, { status: 400 })
     }
-    
+
     const data = await req.formData()
 
     try {
@@ -31,9 +31,12 @@ export async function POST(req: NextRequest) {
             firstName: data.get("firstName") as string,
             lastName: data.get("lastName") as string,
             emailAddress: [data.get("email") as string],
-            password: data.get("password") as string 
+            password: data.get("password") as string,
+            publicMetadata: {
+                role: data.get("role") as UserRole
+            }
         })
-        
+
         // Insert into database
         const createUser = await prisma.users.create({
             data: {

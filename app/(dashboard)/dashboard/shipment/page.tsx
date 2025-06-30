@@ -89,6 +89,11 @@ export default function shipment() {
                                                     <td className="py-4 pr-4 pl-3 text-right text-sm font-medium sm:pr-0">
                                                         <div className="flex items-center space-x-4">
                                                             <Link
+                                                                href={"/dashboard/shipment/1/costing/add"}
+                                                            >
+                                                                Costing
+                                                            </Link>
+                                                            <Link
                                                                 href={"/dashboard/shipment/edit"}
                                                                 className="text-[#1A5098] hover:text-[#1a5198eb]"
                                                             >

@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { auth } from "@clerk/nextjs/server";
 import { NextRequest, NextResponse } from "next/server";
 import { UserRole } from "@/lib/interface";
+import clerkClient from "@clerk/clerk-sdk-node";
 
 export async function PUT(req: NextRequest) {
     const { userId } = await auth()
@@ -33,19 +34,35 @@ export async function PUT(req: NextRequest) {
         return NextResponse.json({ message: "User not found." }, { status: 404 })
     }
 
-    const updateUser = await prisma.users.update({
-        where: {
-            id: parseInt(id)
-        },
-        data: {
+    try {
+        // Update clerk database
+        const updateClerkUser = await clerkClient.users.updateUser(user.clerkId, {
             firstName: data.get("firstName") as string,
             lastName: data.get("lastName") as string,
-            email: data.get("email") as string,
-            role: data.get("role") as UserRole
-        }
-    })
-  
-    return NextResponse.json({ success: true, message: "User updated successfully" }, { status: 201 })
+            publicMetadata: {
+                role: data.get("role") as UserRole
+            }
+        })
+
+        // Update internal database
+        const updateUser = await prisma.users.update({
+            where: {
+                id: parseInt(id)
+            },
+            data: {
+                firstName: data.get("firstName") as string,
+                lastName: data.get("lastName") as string,
+                email: data.get("email") as string,
+                role: data.get("role") as UserRole
+            }
+        })
+
+        return NextResponse.json({ success: true, message: "User updated successfully" }, { status: 201 })
+    } catch (err) {
+        console.log(err)
+        return NextResponse.json({ success: false, message: "Failed to submit data. Something went wrong." }, { status: 500 })
+    }
+
 }
 
 export async function GET(req: NextRequest) {

@@ -29,7 +29,7 @@ export default function UserPage() {
 
     /**
      * This function fetches all of the users
-     * 
+     *
      * @returns - none
      */
     const fetchUsers = async (): Promise<void> => {
@@ -53,8 +53,8 @@ export default function UserPage() {
     /**
      * This function handles the submission of
      * new user data input by user with ADMIN role
-     * 
-     * @param e 
+     *
+     * @param e
      * @returns - none
      */
     const handleSubmit = async (e: FormEvent<HTMLFormElement>): Promise<void> => {
@@ -86,7 +86,7 @@ export default function UserPage() {
 
     /**
      * This function handles the deletion of the user.
-     * 
+     *
      * @returns - none
      */
     const handleClickDelete = async () => {
@@ -97,7 +97,7 @@ export default function UserPage() {
                     id: selectedUserId
                 })
             })
-            
+
             if (!res.ok) {
                 throw new Error("Failed to submit data.")
             }
