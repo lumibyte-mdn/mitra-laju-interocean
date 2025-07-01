@@ -1,16 +1,41 @@
 "use client"
 
-import shipmentdata from "@/lib/shipment";
+import { Shipment } from "@/lib/interface";
+import { transformDate } from "@/lib/utils";
 import { Dialog, DialogBackdrop, DialogPanel, DialogTitle } from "@headlessui/react";
 import { ExclamationTriangleIcon } from "@heroicons/react/16/solid";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function shipment() {
-    const SHIPMENT = shipmentdata
+    const [shipments, setShipments] = useState([])
 
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
     const [selectedShipmentId, setSelectedShipmentId] = useState<number | null>(null)
+
+    /**
+     * This function fetches the shipment data
+     */
+    const fetchShipments = async () => {
+        try {
+            const res = await fetch("/api/shipments")
+            const data = await res.json()
+
+            if (!res.ok) {
+                throw new Error("Failed to fetch data.")
+            }
+
+            if (data.success) {
+                setShipments(data.shipments)
+            }
+        } catch (err) {
+            console.log(err)
+        }
+    }
+
+    useEffect(() => {
+        fetchShipments()
+    }, [])
 
     return (
         <>
@@ -71,58 +96,60 @@ export default function shipment() {
                                             </tr>
                                         </thead>
                                         <tbody className="divide-y divide-gray-200 bg-white">
-                                            {SHIPMENT.map((shipmentdata) =>
-                                                <tr key={shipmentdata.id}>
-                                                    <td
-                                                        className="w-full max-w-0 py-4 pr-3 pl-4 text-sm font-medium text-gray-900 sm:w-auto sm:max-w-none sm:pl-0">
-                                                        {shipmentdata.nomororderan}
-                                                        <dl className="font-normal lg:hidden">
-                                                            <dd className="mt-1 truncate text-gray-700">{shipmentdata.customer}</dd>
-                                                            <dt className="sr-only sm:hidden">Email</dt>
-                                                            <dd className="mt-1 truncate text-gray-500 sm:hidden">{shipmentdata.shipper}</dd>
-                                                        </dl>
-                                                    </td>
-                                                    <td className="hidden px-3 py-4 text-sm text-gray-500 lg:table-cell">{shipmentdata.customer}</td>
-                                                    <td className="hidden px-3 py-4 text-sm text-gray-500 lg:table-cell">{shipmentdata.kodecustomer}</td>
-                                                    <td className="hidden px-3 py-4 text-sm text-gray-500 sm:table-cell">{shipmentdata.shipper}</td>
-                                                    <td className="hidden px-3 py-4 text-sm text-gray-500 sm:table-cell">{shipmentdata.duedate}</td>
-                                                    <td className="py-4 pr-4 pl-3 text-right text-sm font-medium sm:pr-0">
-                                                        <div className="flex items-center space-x-4">
-                                                            <Link
-                                                                href={"/dashboard/shipment/1/costing/add"}
-                                                            >
-                                                                Costing
-                                                            </Link>
-                                                            <Link
-                                                                href={"/dashboard/shipment/edit"}
-                                                                className="text-[#1A5098] hover:text-[#1a5198eb]"
-                                                            >
-                                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="size-6 text-[#1A5098] hover:text-[#1a3798]">
-                                                                    <path d="M21.731 2.269a2.625 2.625 0 0 0-3.712 0l-1.157 1.157 3.712 3.712 1.157-1.157a2.625 2.625 0 0 0 0-3.712ZM19.513 8.199l-3.712-3.712-8.4 8.4a5.25 5.25 0 0 0-1.32 2.214l-.8 2.685a.75.75 0 0 0 .933.933l2.685-.8a5.25 5.25 0 0 0 2.214-1.32l8.4-8.4Z" />
-                                                                    <path d="M5.25 5.25a3 3 0 0 0-3 3v10.5a3 3 0 0 0 3 3h10.5a3 3 0 0 0 3-3V13.5a.75.75 0 0 0-1.5 0v5.25a1.5 1.5 0 0 1-1.5 1.5H5.25a1.5 1.5 0 0 1-1.5-1.5V8.25a1.5 1.5 0 0 1 1.5-1.5h5.25a.75.75 0 0 0 0-1.5H5.25Z" />
-                                                                </svg>
-                                                            </Link>
-                                                            <Link
-                                                                onClick={(e) => {
-                                                                    e.preventDefault();
-                                                                    setSelectedShipmentId(shipmentdata.id);
-                                                                    setIsDeleteDialogOpen(true);
-                                                                }}
-                                                                href={"#"}
-                                                                className="text-red-600 hover:text-red-700"
-                                                            >
-                                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="size-6">
-                                                                    <path fillRule="evenodd" d="M16.5 4.478v.227a48.816 48.816 0 0 1 3.878.512.75.75 0 1 1-.256 1.478l-.209-.035-1.005 13.07a3 3 0 0 1-2.991 2.77H8.084a3 3 0 0 1-2.991-2.77L4.087 6.66l-.209.035a.75.75 0 0 1-.256-1.478A48.567 48.567 0 0 1 7.5 4.705v-.227c0-1.564 1.213-2.9 2.816-2.951a52.662 52.662 0 0 1 3.369 0c1.603.051 2.815 1.387 2.815 2.951Zm-6.136-1.452a51.196 51.196 0 0 1 3.273 0C14.39 3.05 15 3.684 15 4.478v.113a49.488 49.488 0 0 0-6 0v-.113c0-.794.609-1.428 1.364-1.452Zm-.355 5.945a.75.75 0 1 0-1.5.058l.347 9a.75.75 0 1 0 1.499-.058l-.346-9Zm5.48.058a.75.75 0 1 0-1.498-.058l-.347 9a.75.75 0 0 0 1.5.058l.345-9Z" clipRule="evenodd" />
-                                                                </svg>
-                                                            </Link>
-                                                        </div>
-                                                    </td>
-                                                </tr>
-                                            )}
+                                            {
+                                                shipments.map((shipment: Shipment) =>
+                                                    <tr key={shipment.id}>
+                                                        <td
+                                                            className="w-full max-w-0 py-4 pr-3 pl-4 text-sm font-medium text-gray-900 sm:w-auto sm:max-w-none sm:pl-0">
+                                                            {shipment.orderNumber}
+                                                            <dl className="font-normal lg:hidden">
+                                                                <dd className="mt-1 truncate text-gray-700">{shipment.customer}</dd>
+                                                                <dt className="sr-only sm:hidden">Email</dt>
+                                                                <dd className="mt-1 truncate text-gray-500 sm:hidden">{shipment.shipper}</dd>
+                                                            </dl>
+                                                        </td>
+                                                        <td className="hidden px-3 py-4 text-sm text-gray-500 lg:table-cell">{shipment.customer}</td>
+                                                        <td className="hidden px-3 py-4 text-sm text-gray-500 lg:table-cell">{shipment.customerCode}</td>
+                                                        <td className="hidden px-3 py-4 text-sm text-gray-500 sm:table-cell">{shipment.shipper}</td>
+                                                        <td className="hidden px-3 py-4 text-sm text-gray-500 sm:table-cell">{transformDate(shipment.dueDate.split("T")[0])}</td>
+                                                        <td className="py-4 pr-4 pl-3 text-right text-sm font-medium sm:pr-0">
+                                                            <div className="flex items-center space-x-4">
+                                                                <Link
+                                                                    href={`/dashboard/shipments/${shipment.id}/costing/add`}
+                                                                >
+                                                                    Costing
+                                                                </Link>
+                                                                <Link
+                                                                    href={`/dashboard/shipments/${shipment.id}/edit`}
+                                                                    className="text-[#1A5098] hover:text-[#1a5198eb]"
+                                                                >
+                                                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="size-6 text-[#1A5098] hover:text-[#1a3798]">
+                                                                        <path d="M21.731 2.269a2.625 2.625 0 0 0-3.712 0l-1.157 1.157 3.712 3.712 1.157-1.157a2.625 2.625 0 0 0 0-3.712ZM19.513 8.199l-3.712-3.712-8.4 8.4a5.25 5.25 0 0 0-1.32 2.214l-.8 2.685a.75.75 0 0 0 .933.933l2.685-.8a5.25 5.25 0 0 0 2.214-1.32l8.4-8.4Z" />
+                                                                        <path d="M5.25 5.25a3 3 0 0 0-3 3v10.5a3 3 0 0 0 3 3h10.5a3 3 0 0 0 3-3V13.5a.75.75 0 0 0-1.5 0v5.25a1.5 1.5 0 0 1-1.5 1.5H5.25a1.5 1.5 0 0 1-1.5-1.5V8.25a1.5 1.5 0 0 1 1.5-1.5h5.25a.75.75 0 0 0 0-1.5H5.25Z" />
+                                                                    </svg>
+                                                                </Link>
+                                                                <Link
+                                                                    onClick={(e) => {
+                                                                        e.preventDefault();
+                                                                        setSelectedShipmentId(shipment.id);
+                                                                        setIsDeleteDialogOpen(true);
+                                                                    }}
+                                                                    href={"#"}
+                                                                    className="text-red-600 hover:text-red-700"
+                                                                >
+                                                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="size-6">
+                                                                        <path fillRule="evenodd" d="M16.5 4.478v.227a48.816 48.816 0 0 1 3.878.512.75.75 0 1 1-.256 1.478l-.209-.035-1.005 13.07a3 3 0 0 1-2.991 2.77H8.084a3 3 0 0 1-2.991-2.77L4.087 6.66l-.209.035a.75.75 0 0 1-.256-1.478A48.567 48.567 0 0 1 7.5 4.705v-.227c0-1.564 1.213-2.9 2.816-2.951a52.662 52.662 0 0 1 3.369 0c1.603.051 2.815 1.387 2.815 2.951Zm-6.136-1.452a51.196 51.196 0 0 1 3.273 0C14.39 3.05 15 3.684 15 4.478v.113a49.488 49.488 0 0 0-6 0v-.113c0-.794.609-1.428 1.364-1.452Zm-.355 5.945a.75.75 0 1 0-1.5.058l.347 9a.75.75 0 1 0 1.499-.058l-.346-9Zm5.48.058a.75.75 0 1 0-1.498-.058l-.347 9a.75.75 0 0 0 1.5.058l.345-9Z" clipRule="evenodd" />
+                                                                    </svg>
+                                                                </Link>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                )
+                                            }
                                         </tbody>
                                     </table>
 
-                                    {/* dialog hapus*/}
+                                    {/* Delete dialog */}
                                     {isDeleteDialogOpen && selectedShipmentId !== null && (
                                         <Dialog
                                             open={isDeleteDialogOpen}

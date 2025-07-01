@@ -5,10 +5,13 @@ import sizes from "@/lib/sizes";
 
 import { Listbox, ListboxButton, ListboxOption, ListboxOptions } from "@headlessui/react";
 import { CheckIcon, ChevronUpDownIcon } from "@heroicons/react/16/solid";
+import { useRouter } from "next/navigation";
 
 import React, { FormEvent, useState } from "react";
 
 export default function ShipmentAdd() {
+    const router = useRouter()
+
     // Used for dropdown selection
     const [selectedSize, setSelectedSize] = useState(sizes[0]);
     const [selectedShipmentType, setSelectedShipmentType] = useState(shipmentTypes[0]);
@@ -37,6 +40,10 @@ export default function ShipmentAdd() {
 
             if (!res.ok) {
                 throw new Error("Failed to submit data.")
+            }
+
+            if (data.success) {
+                router.push("/dashboard/shipments")
             }
         } catch (err) {
             console.log(err)
@@ -340,7 +347,7 @@ export default function ShipmentAdd() {
 
                                                         id="bookingNumber"
                                                         name="bookingNumber"
-                                                        type="number"
+                                                        type="text"
                                                         placeholder="Masukkan nomor booking"
                                                         className="no-spinner block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-[#1A5098] sm:text-sm/6 disabled:text-gray-400 appearance-none"
                                                     />

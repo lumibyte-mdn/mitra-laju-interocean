@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 
-import menuItems from "@/lib/listmenu";
+import menuItems from "@/lib/menuItems";
 
 export default function Menu() {
     const MENUITEMS = menuItems;

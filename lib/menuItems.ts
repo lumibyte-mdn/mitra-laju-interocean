@@ -10,17 +10,17 @@ const menuItems = [
             {
                 icon: "/svg/shipment.svg",
                 label: "Shipment",
-                href: "/dashboard/shipment"
+                href: "/dashboard/shipments"
             },
             {
                 icon: "/svg/employee.svg",
                 label: "Employee",
-                href: "/dashboard/employee"
+                href: "/dashboard/employees"
             },
             {
                 icon: "/svg/invoice.svg",
                 label: "Invoice",
-                href: "/dashboard/invoice"
+                href: "/dashboard/invoices"
             }
         ],
     },

@@ -1,10 +1,72 @@
 "use client"
 
 import { Costing } from "@/lib/interface"
-import { FormEvent, useState } from "react"
+import { usePathname } from "next/navigation"
+import { ChangeEvent, FormEvent, useEffect, useState } from "react"
 
 export default function ShipmentCosting() {
-    const [costings, setCostings] = useState([])
+    const path = usePathname()
+
+    const [shipmentCostings, setShipmentCostings] = useState([])
+
+    // Tracking changes for frontend re-render
+    const [amount, setAmount]  = useState({
+        price: "",
+        currency: "",
+        subCosting: "",
+        reimbursement: "",
+    })
+
+    // Checkbox for taxes
+    const [vat, setVat] = useState(false)
+    const [incomeTax, setIncomeTax] = useState(false)
+
+    /**
+     * Keeps track of the changes made to
+     * the amount of price * currency
+     * @param e
+     */
+    const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+        const { name, value } = e.target
+
+        console.log(name, value)
+
+        setAmount(prev => ({
+            ...prev,
+            [name]: value
+        }))
+    }
+
+    /**
+     * Calculates the amount
+     *
+     * @returns - number
+     */
+    const calculateAmount = () => {
+        if (amount.price == "" || amount.currency == "") {
+            return 0
+        }
+
+        return (parseInt(amount.price) * parseInt(amount.currency)).toLocaleString()
+    }
+
+    /**
+     * Calculates the total cost of a particular costing
+     *
+     * @returns - number
+     */
+    const calculateTotalCost = () => {
+        const vatPercentage = vat ? 0.011 : 0
+        const incomeTaxPercentage = incomeTax ? 0.02 : 0
+
+        if (amount.subCosting == "" || amount.reimbursement == "") {
+            return 0
+        }
+
+        console.log(vatPercentage, incomeTaxPercentage)
+
+        return (parseInt(amount.subCosting) + parseInt(amount.reimbursement)) + ((parseInt(amount.subCosting) + parseInt(amount.reimbursement)) * incomeTaxPercentage) + ((parseInt(amount.subCosting) + parseInt(amount.reimbursement)) * vatPercentage)
+    }
 
     /**
      * This function handles the submission of the
@@ -30,11 +92,30 @@ export default function ShipmentCosting() {
      */
     const fetchShipmentCosting = async () => {
         try {
+            const res = await fetch("/api/shipment-costings", {
+                method: "POST",
+                body: JSON.stringify({
+                    shipmentId: path.split("/")[3]
+                })
+            })
 
+            const data = await res.json()
+
+            if (!res.ok) {
+                throw new Error("Failed to fetch data.")
+            }
+
+            if (data.success) {
+                setShipmentCostings(data.shipmentCostings)
+            }
         } catch (err) {
-
+            console.log(err)
         }
     }
+
+    useEffect(() => {
+        fetchShipmentCosting()
+    }, [])
 
     return (
         <>
@@ -82,9 +163,10 @@ export default function ShipmentCosting() {
                                                         <div className="flex items-center rounded-md bg-white pl-3 outline-1 -outline-offset-1 outline-gray-300 has-[input:focus-within]:outline-2 has-[input:focus-within]:-outline-offset-2 has-[input:focus-within]:outline-[#1A5098]">
                                                             <div className="shrink-0 text-base text-gray-500 select-none sm:text-sm/6">Rp.</div>
                                                             <input
-                                                                type="text"
+                                                                type="number"
                                                                 name="price"
                                                                 id="price"
+                                                                onChange={handleChange}
                                                                 className="no-spinner block min-w-0 grow py-1.5 pr-3 pl-1 text-base text-gray-900 placeholder:text-gray-400 focus:outline-none sm:text-sm/6"
                                                                 placeholder="0.00"
                                                             />
@@ -101,6 +183,7 @@ export default function ShipmentCosting() {
                                                                 type="text"
                                                                 name="currency"
                                                                 id="currency"
+                                                                onChange={handleChange}
                                                                 className="no-spinner block min-w-0 grow py-1.5 pr-3 pl-1 text-base text-gray-900 placeholder:text-gray-400 focus:outline-none sm:text-sm/6"
                                                                 placeholder="0.00" />
                                                         </div>
@@ -118,6 +201,7 @@ export default function ShipmentCosting() {
                                                                 readOnly
                                                                 disabled
                                                                 id="amount"
+                                                                value={calculateAmount()}
                                                                 className="no-spinner block min-w-0 grow py-1.5 pr-3 pl-1 text-base text-gray-900 placeholder:text-gray-400 focus:outline-none sm:text-sm/6"
                                                                 placeholder="0.00"
                                                             />
@@ -165,6 +249,7 @@ export default function ShipmentCosting() {
                                                                 type="text"
                                                                 name="subCosting"
                                                                 id="subCosting"
+                                                                onChange={handleChange}
                                                                 className="no-spinner block min-w-0 grow py-1.5 pr-3 pl-1 text-base text-gray-900 placeholder:text-gray-400 focus:outline-none sm:text-sm/6"
                                                                 placeholder="0.00"
                                                             />
@@ -181,6 +266,7 @@ export default function ShipmentCosting() {
                                                                 type="text"
                                                                 name="reimbursement"
                                                                 id="reimbursement"
+                                                                onChange={handleChange}
                                                                 className="no-spinner block min-w-0 grow py-1.5 pr-3 pl-1 text-base text-gray-900 placeholder:text-gray-400 focus:outline-none sm:text-sm/6"
                                                                 placeholder="0.00" />
                                                         </div>
@@ -199,6 +285,7 @@ export default function ShipmentCosting() {
                                                                         id="vat"
                                                                         name="vat"
                                                                         type="checkbox"
+                                                                        onChange={() => setVat(!vat)}
                                                                         aria-describedby="candidates-description"
                                                                         className="col-start-1 row-start-1 appearance-none rounded-sm border border-gray-300 bg-white checked:border-[#1A5098] checked:bg-[#1A5098] indeterminate:border-[#1A5098] indeterminate:bg-[#1A5098] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1A5098] disabled:border-gray-300 disabled:bg-gray-100 disabled:checked:bg-gray-100 forced-colors:appearance-auto"
                                                                     />
@@ -238,6 +325,7 @@ export default function ShipmentCosting() {
                                                                         id="incomeTax"
                                                                         name="incomeTax"
                                                                         type="checkbox"
+                                                                        onChange={() => setIncomeTax(!incomeTax)}
                                                                         aria-describedby="candidates-description"
                                                                         className="col-start-1 row-start-1 appearance-none rounded-sm border border-gray-300 bg-white checked:border-[#1A5098] checked:bg-[#1A5098] indeterminate:border-[#1A5098] indeterminate:bg-[#1A5098] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1A5098] disabled:border-gray-300 disabled:bg-gray-100 disabled:checked:bg-gray-100 forced-colors:appearance-auto"
                                                                     />
@@ -282,6 +370,7 @@ export default function ShipmentCosting() {
                                                                 name="totalcost"
                                                                 id="totalcost"
                                                                 readOnly
+                                                                value={calculateTotalCost()}
                                                                 disabled
                                                                 className="no-spinner block min-w-0 grow py-1.5 pr-3 pl-1 text-base text-gray-900 placeholder:text-gray-400 focus:outline-none sm:text-sm/6"
                                                                 placeholder="0.00"
@@ -340,7 +429,7 @@ export default function ShipmentCosting() {
                                                 </div>
 
                                                 {
-                                                    costings.length == 0
+                                                    shipmentCostings.length == 0
                                                     ?
                                                     <div className="bg-white text-gray-300 text-center py-6">
                                                         <div className="flex flex-col items-center">
@@ -359,9 +448,9 @@ export default function ShipmentCosting() {
                                                     :
                                                     <>
                                                         {
-                                                            costings.map((costing: Costing, index) => (
+                                                            shipmentCostings.map((shipmentCosting: Costing, index) => (
                                                                 <div>
-                                                                    <button>{costing.vendorName}</button>
+                                                                    <button>{shipmentCosting.vendorName}</button>
                                                                 </div>
                                                             ))
                                                         }
