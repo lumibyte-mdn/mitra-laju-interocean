@@ -1,7 +1,8 @@
+import { prisma } from "@/lib/prisma";
 import { auth } from "@clerk/nextjs/server";
 import { NextRequest, NextResponse } from "next/server";
 
-export async function GET(req: NextRequest) {
+export async function POST(req: NextRequest) {
     const { userId } = await auth()
 
     if (!userId) {
@@ -10,11 +11,21 @@ export async function GET(req: NextRequest) {
 
     const data = await req.json()
 
-    console.log(data)
+    const createCosting = await prisma.costings.create({
+        data: {
+            shipmentId: parseInt(data.shipmentId),
+            vendorName: data.vendorName,
+            price: parseInt(data.price),
+            currency: parseInt(data.currency),
+            localFee: parseInt(data.localFee),
+            freight: parseInt(data.freight),
+            subCosting: data.subCosting,
+            reimbursement: parseInt(data.reimbursement),
+            vat: data.vat,
+            incomeTax: data.incomeTax,
+            freightPaymentDate: data.freightPaymentDate + "T00:00:00.000Z"
+        }
+    })
 
-    return NextResponse.json({ success: true }, { status: 200 })
-}
-
-export async function POST(req: NextRequest) {
-
+    return NextResponse.json({ success: true }, { status: 201 })
 }
