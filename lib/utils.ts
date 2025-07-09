@@ -33,10 +33,10 @@ export function titleCase(words: string): string {
  * @param hasVat 
  * @returns 
  */
-export const dataCostingTotal = (subCosting: number, reimbursement: number, hasVat: boolean) => {
+export const dataCostingTotal = (price: number, currency: number, qty: number, freight: number, localFee: number, reimbursement: number, hasVat: boolean) => {
     const vatPercentage = hasVat ? 0.011 : 0
 
-    return (subCosting + reimbursement + (subCosting * vatPercentage)).toLocaleString()
+    return (((price * currency * qty) + localFee + freight) + reimbursement + (((price * currency * qty) + localFee + freight) * vatPercentage)).toLocaleString()
 }
 
 /**
@@ -49,11 +49,11 @@ export const dataCostingTotal = (subCosting: number, reimbursement: number, hasV
  * @param hasIncomeTax 
  * @returns 
  */
-export const dataCostingVendorPayment = (subCosting: number, reimbursement: number, hasVat: boolean, hasIncomeTax: boolean) => {
+export const dataCostingVendorPayment = (price: number, currency: number, qty: number, freight: number, localFee: number, reimbursement: number, hasVat: boolean, hasIncomeTax: boolean) => {
     const vatPercentage = hasVat ? 0.011 : 0
     const incomeTaxPercentage = hasIncomeTax ? 0.02 : 0
 
-    return (subCosting + reimbursement + (subCosting * vatPercentage) - (subCosting * incomeTaxPercentage)).toLocaleString()
+    return (((price * currency * qty) + localFee + freight) + reimbursement + (((price * currency * qty) + localFee + freight) * vatPercentage) - (((price * currency * qty) + localFee + freight) * incomeTaxPercentage)).toLocaleString()
 }
 
 /**
@@ -62,12 +62,12 @@ export const dataCostingVendorPayment = (subCosting: number, reimbursement: numb
  * 
  * @returns - number
  */
-export const calculateAmount = (price: string, currency: string) => {
+export const calculateAmount = (price: string, currency: string, qty: number) => {
     if (price == "" || currency == "") {
         return 0
     }
 
-    return (parseInt(price) * parseInt(currency)).toLocaleString()
+    return (parseInt(price) * parseInt(currency) * qty).toLocaleString()
 }
 
 /**
@@ -76,14 +76,12 @@ export const calculateAmount = (price: string, currency: string) => {
  * 
  * @returns - number
  */
-export const calculateSubCosting = (price: string, currency: string, localFee: string, freight: string) => {
-    const amount = calculateAmount(price, currency)
-
+export const calculateSubCosting = (price: string, currency: string, localFee: string, freight: string, qty: number) => {
     if (localFee == "" || freight == "") {
         return 0
     }
 
-    return ((parseInt(price) * parseInt(currency)) + parseInt(localFee) + parseInt(freight)).toLocaleString()
+    return ((parseInt(price) * parseInt(currency) * qty) + parseInt(localFee) + parseInt(freight)).toLocaleString()
 }
 
 /**
@@ -92,14 +90,14 @@ export const calculateSubCosting = (price: string, currency: string, localFee: s
  * 
  * @returns - number
  */
-export const calculateTotalCost = (price: string, currency: string, localFee: string, freight: string, reimbursement: string, vat: boolean) => {
+export const calculateTotalCost = (price: string, currency: string, localFee: string, freight: string, reimbursement: string, vat: boolean, qty: number) => {
     const vatPercentage = vat ? 0.011 : 0
 
     if (localFee == "" || freight == "") {
         return 0
     }
 
-    return ((parseInt(price) * parseInt(currency)) + parseInt(localFee) + parseInt(freight) + parseInt(reimbursement) + (((parseInt(price) * parseInt(currency)) + parseInt(localFee) + parseInt(freight)) * vatPercentage)).toLocaleString()
+    return ((parseInt(price) * parseInt(currency) * qty) + parseInt(localFee) + parseInt(freight) + parseInt(reimbursement) + (((parseInt(price) * parseInt(currency)) + parseInt(localFee) + parseInt(freight)) * vatPercentage)).toLocaleString()
 }
 
 /**
@@ -108,7 +106,7 @@ export const calculateTotalCost = (price: string, currency: string, localFee: st
  * 
  * @returns - number
  */
-export const calculatePaymentToVendor = (price: string, currency: string, localFee: string, reimbursement: string, freight: string, vat: boolean, incomeTax: boolean) => {
+export const calculatePaymentToVendor = (price: string, currency: string, localFee: string, reimbursement: string, freight: string, vat: boolean, incomeTax: boolean, qty: number) => {
     const incomeTaxPercentage = incomeTax ? 0.02 : 0
     const vatPercentage = vat ? 0.011 : 0
 
@@ -116,5 +114,5 @@ export const calculatePaymentToVendor = (price: string, currency: string, localF
         return 0
     }
 
-    return ((parseInt(price) * parseInt(currency)) + parseInt(localFee) + parseInt(freight) + parseInt(reimbursement) + (((parseInt(price) * parseInt(currency)) + parseInt(localFee) + parseInt(freight)) * vatPercentage) - (((parseInt(price) * parseInt(currency)) + parseInt(localFee) + parseInt(freight)) * incomeTaxPercentage)).toLocaleString()
+    return ((parseInt(price) * parseInt(currency) * qty) + parseInt(localFee) + parseInt(freight) + parseInt(reimbursement) + (((parseInt(price) * parseInt(currency) * qty) + parseInt(localFee) + parseInt(freight)) * vatPercentage) - (((parseInt(price) * parseInt(currency)) + parseInt(localFee) + parseInt(freight)) * incomeTaxPercentage)).toLocaleString()
 }

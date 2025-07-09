@@ -9,8 +9,8 @@ import { Listbox, ListboxButton, ListboxOption, ListboxOptions } from "@headless
 import { CheckIcon, ChevronUpDownIcon } from "@heroicons/react/16/solid";
 import { usePathname } from "next/navigation";
 
-import { useEffect, useState } from "react";
-import { dataCostingTotal, dataCostingVendorPayment, transformDate } from "@/lib/utils";
+import { ChangeEvent, FormEvent, useEffect, useState } from "react";
+import { calculateSubCosting, dataCostingTotal, dataCostingVendorPayment, transformDate } from "@/lib/utils";
 import { Costing } from "@/lib/interface";
 
 export default function ShipmentEdit() {
@@ -18,6 +18,7 @@ export default function ShipmentEdit() {
 
     const [selectedSize, setSelectedSize] = useState(sizes[0]);
     const [selectedShipmentType, setSelectedShipmentType] = useState(shipmentTypes[0]);
+    const [shipmentQty, setShipmentQty] = useState(0)
 
     const [costings, setCostings] = useState([])
 
@@ -40,19 +41,59 @@ export default function ShipmentEdit() {
     const [isEditing, setIsEditing] = useState(false)
     const [openIndex, setOpenIndex] = useState<number | null>(null);
 
-    const toggleAccordion = (index: number) => {
-        setOpenIndex(prev => (prev === index ? null : index));
-    };
-
+    /**
+     * Cancels the edit functionality
+     * of the shipment form.
+     */
     const handleCancelClick = () => {
         setIsEditing(false);
     };
 
-    const handleSaveClick = () => {
-        // Simulasikan penyimpanan data, bisa ganti dengan fetch/axios post di sini
-        alert("Data berhasil disimpan!");
-        setIsEditing(false);
+    /**
+     * Handles the submission of the edited
+     * shipment
+     * 
+     * @returns - none
+     */
+    const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+        e.preventDefault()
+
+        shipmentDetail.size = selectedSize.value
+        shipmentDetail.shipmentType = selectedShipmentType.value
+
+        try {
+            const res = await fetch(`/api/shipments/${path.split("/")[3]}`, {
+                method: "PUT",
+                body: JSON.stringify(shipmentDetail)
+            })
+            const data = await res.json()
+
+            if (!res.ok) {
+                throw new Error("Failed to submit data.")
+            }
+
+            if (data.success) {
+                location.reload()
+            }
+        } catch (err) {
+            console.log(err)
+        }
     };
+
+    /**
+     * Keep track of the changes of the shipment form input
+     * made by the user
+     * 
+     * @param e
+     */
+    const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+        const { name, value } = e.target
+
+        setShipmentDetail(prev => ({
+            ...prev,
+            [name]: value
+        }))
+    }
 
     /**
      * Fetches the shipment detail and populate
@@ -71,7 +112,8 @@ export default function ShipmentEdit() {
             console.log(data)
             if (data.success) {
                 setShipmentDetail(data.shipmentDetail)
-                setCostings(data.costings )
+                setCostings(data.costings)
+                setShipmentQty(parseInt(data.shipmentDetail.qty))
 
                 for (let index in shipmentTypes) {
                     if (shipmentTypes[index].value == data.shipmentDetail.shipmentType) {
@@ -88,7 +130,7 @@ export default function ShipmentEdit() {
                 }
             }
         } catch (err) {
-
+            console.log(err)
         }
     }
 
@@ -1104,10 +1146,7 @@ export default function ShipmentEdit() {
 
                                 <div className="overflow-y-auto max-h-[66vh] mt-8">
                                     {/* Shipment Form */}
-                                    <form>
-                                        {/* Button to enable edit form */}
-                                        
-
+                                    <form onSubmit={handleSubmit}>
                                         {/* Shipment Data */}
                                         <div>
                                             <div>
@@ -1127,6 +1166,7 @@ export default function ShipmentEdit() {
                                                             type="text"
                                                             disabled={!isEditing}
                                                             value={shipmentDetail.orderNumber}
+                                                            onChange={handleChange}
                                                             placeholder="Masukkan nomor orderan"
                                                             className="no-spinner block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-[#1A5098] sm:text-sm/6 disabled:text-gray-400 appearance-none"
                                                         />
@@ -1146,6 +1186,7 @@ export default function ShipmentEdit() {
                                                             type="text"
                                                             disabled={!isEditing}
                                                             value={shipmentDetail.customer}
+                                                            onChange={handleChange}
                                                             placeholder="Masukkan nama customer"
                                                             className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-[#1A5098] sm:text-sm/6 disabled:text-gray-400 appearance-none"
                                                         />
@@ -1166,6 +1207,7 @@ export default function ShipmentEdit() {
                                                             type="text"
                                                             disabled={!isEditing}
                                                             value={shipmentDetail.shipper}
+                                                            onChange={handleChange}
                                                             placeholder="Masukkan nama shipper"
                                                             className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-[#1A5098] sm:text-sm/6 disabled:text-gray-400 appearance-none"
                                                         />
@@ -1184,6 +1226,7 @@ export default function ShipmentEdit() {
                                                             value={shipmentDetail.dueDate.split("T")[0]}
                                                             id="dueDate"
                                                             name="dueDate"
+                                                            onChange={handleChange}
                                                             type="date"
                                                             className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-[#1A5098] sm:text-sm/6 disabled:text-gray-400 appearance-none"
                                                         />
@@ -1209,6 +1252,7 @@ export default function ShipmentEdit() {
                                                             id="customerCode"
                                                             name="customerCode"
                                                             disabled={!isEditing}
+                                                            onChange={handleChange}
                                                             value={shipmentDetail.customerCode}
                                                             type="text"
                                                             placeholder="Masukkan nomor orderan"
@@ -1228,6 +1272,7 @@ export default function ShipmentEdit() {
                                                             id="qty"
                                                             name="qty"
                                                             type="number"
+                                                            onChange={handleChange}
                                                             disabled={!isEditing}
                                                             value={shipmentDetail.qty}
                                                             placeholder="Masukkan nama customer"
@@ -1244,7 +1289,7 @@ export default function ShipmentEdit() {
                                                         </label>
                                                     </div>
                                                     <div className="w-2/3">
-                                                        <Listbox value={selectedSize} onChange={setSelectedSize} disabled={!isEditing}>
+                                                        <Listbox value={selectedSize} onChange={setSelectedSize} disabled={!isEditing} name="size">
                                                             <div className="relative">
                                                                 <ListboxButton className="grid w-full cursor-default grid-cols-1 rounded-md bg-white py-1.5 pr-2 pl-3 text-left text-gray-900 outline-1 -outline-offset-1 outline-gray-300 focus:outline-2 focus:-outline-offset-2 focus:outline-[#1A5098] sm:text-sm/6">
                                                                     <span className="col-start-1 row-start-1 truncate pr-6">{selectedSize?.value}</span>
@@ -1291,6 +1336,7 @@ export default function ShipmentEdit() {
                                                             type="text"
                                                             disabled={!isEditing}
                                                             value={shipmentDetail.origin}
+                                                            onChange={handleChange}
                                                             placeholder="Masukkan asal Kota / Negara"
                                                             className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-[#1A5098] sm:text-sm/6 disabled:text-gray-400 appearance-none"
                                                         />
@@ -1307,6 +1353,7 @@ export default function ShipmentEdit() {
                                                         <input
                                                             disabled={!isEditing}
                                                             value={shipmentDetail.destination}
+                                                            onChange={handleChange}
                                                             id="destination"
                                                             name="destination"
                                                             type="text"
@@ -1323,7 +1370,7 @@ export default function ShipmentEdit() {
                                                         </label>
                                                     </div>
                                                     <div className="w-2/3">
-                                                        <Listbox value={selectedShipmentType} onChange={setSelectedShipmentType} disabled={!isEditing}>
+                                                        <Listbox value={selectedShipmentType} onChange={setSelectedShipmentType} disabled={!isEditing} name="shipmentType">
                                                             <div className="relative">
                                                                 <ListboxButton className="grid w-full cursor-default grid-cols-1 rounded-md bg-white py-1.5 pr-2 pl-3 text-left text-gray-900 outline-1 -outline-offset-1 outline-gray-300 focus:outline-2 focus:-outline-offset-2 focus:outline-[#1A5098] sm:text-sm/6">
                                                                     <span className="col-start-1 row-start-1 truncate pr-6">{selectedShipmentType?.name}</span>
@@ -1368,6 +1415,7 @@ export default function ShipmentEdit() {
                                                             value={shipmentDetail.estimatedDate.split("T")[0]}
                                                             id="estimatedDate"
                                                             name="estimatedDate"
+                                                            onChange={handleChange}
                                                             type="date"
                                                             placeholder="Masukkan nama shipper"
                                                             className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-[#1A5098] sm:text-sm/6 disabled:text-gray-400 appearance-none"
@@ -1387,6 +1435,7 @@ export default function ShipmentEdit() {
                                                             value={shipmentDetail.containerNumber}
                                                             id="containerNumber"
                                                             name="containerNumber"
+                                                            onChange={handleChange}
                                                             type="text"
                                                             placeholder="Masukkan nomor container"
                                                             className="no-spinner block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-[#1A5098] sm:text-sm/6 disabled:text-gray-400 appearance-none"
@@ -1406,6 +1455,7 @@ export default function ShipmentEdit() {
                                                             value={shipmentDetail.bookingNumber}
                                                             id="bookingNumber"
                                                             name="bookingNumber"
+                                                            onChange={handleChange}
                                                             type="text"
                                                             placeholder="Masukkan nomor booking"
                                                             className="no-spinner block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-[#1A5098] sm:text-sm/6 disabled:text-gray-400 appearance-none"
@@ -1426,8 +1476,7 @@ export default function ShipmentEdit() {
                                                     Batal
                                                 </button>
                                                 <button
-                                                    type="button"
-                                                    onClick={handleSaveClick}
+                                                    type="submit"
                                                     className="inline-flex w-full justify-center rounded-md bg-[#1A5098] px-3 py-2 text-sm font-medium text-white shadow-xs hover:bg-[#1a5198eb] sm:ml-3 sm:w-auto"
                                                 >
                                                     Simpan
@@ -1477,8 +1526,8 @@ export default function ShipmentEdit() {
                                                                 <td className="py-4 pr-3 pl-4 text-sm font-medium whitespace-nowrap text-gray-900 sm:pl-3">
                                                                     {costing.vendorName}
                                                                 </td>
-                                                                <td className="px-3 py-4 text-sm whitespace-nowrap text-gray-500">Rp. {dataCostingTotal(costing.subCosting, costing.reimbursement, costing.vat)}</td>
-                                                                <td className="px-3 py-4 text-sm whitespace-nowrap text-gray-500">Rp. {dataCostingVendorPayment(costing.subCosting, costing.reimbursement, costing.vat, costing.incomeTax)}</td>
+                                                                <td className="px-3 py-4 text-sm whitespace-nowrap text-gray-500">Rp. {dataCostingTotal(costing.price, costing.currency, shipmentQty, costing.freight, costing.localFee, costing.reimbursement, costing.vat)}</td>
+                                                                <td className="px-3 py-4 text-sm whitespace-nowrap text-gray-500">Rp. {dataCostingVendorPayment(costing.price, costing.currency, shipmentQty, costing.freight, costing.localFee, costing.reimbursement, costing.vat, costing.incomeTax)}</td>
                                                                 <td className="px-3 py-4 text-sm whitespace-nowrap text-gray-500">{transformDate(costing.freightPaymentDate.split("T")[0])}</td>
                                                                 <td className="relative py-4 pr-4 pl-3 text-right text-sm font-medium whitespace-nowrap sm:pr-3">
                                                                 <Link href={`/dashboard/shipments/${path.split("/")[3]}/costing/${costing.id}/edit`} className="text-[#1A5098] hover:text-indigo-900">

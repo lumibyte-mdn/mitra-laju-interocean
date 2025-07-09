@@ -1,11 +1,12 @@
 "use client"
 
-import { usePathname } from "next/navigation"
-import { ChangeEvent, useEffect, useState } from "react"
+import { usePathname, useRouter } from "next/navigation"
+import { ChangeEvent, FormEvent, useEffect, useState } from "react"
 import { calculateAmount, calculatePaymentToVendor, calculateSubCosting, calculateTotalCost } from "@/lib/utils"
 
 export default function CostingDetail() {
     const path = usePathname()
+    const router = useRouter()
 
     const [vat,setVat] = useState(false)
     const [incomeTax, setIncomeTax] = useState(false)
@@ -22,11 +23,39 @@ export default function CostingDetail() {
         reimbursement: 0,
         vat: false,
         incomeTax: false,
-        freightPaymentDate: ""
+        freightPaymentDate: "",
+        shipmentQty: 0
     })
 
+    /**
+     * Hanldes the changes of the costing form
+     * made by the user.
+     * 
+     * @param e 
+     * @returns 
+     */
     const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target
+
+        if (name == "vat") {
+            setCostingDetail(prev => ({
+                ...prev,
+                [name]: !vat
+            }))
+            setVat(!vat)
+
+            return
+        }
+
+        if (name == "incomeTax") {
+            setCostingDetail(prev => ({
+                ...prev,
+                [name]: !incomeTax
+            }))
+            setIncomeTax(!incomeTax)
+
+            return
+        }
 
         setCostingDetail(prev => ({
             ...prev,
@@ -40,8 +69,29 @@ export default function CostingDetail() {
      * 
      * @returns - none
      */
-    const handleSubmit = async () => {
+    const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+        e.preventDefault()
 
+        costingDetail.shipmentQty = shipmentQty
+
+        try {
+            const res = await fetch(`/api/costings/${path.split("/")[5]}`, {
+                method: "PUT",
+                body: JSON.stringify(costingDetail)
+            })
+
+            const data = await res.json()
+
+            if (!res.ok) {
+                throw new Error("Failed to submit data.")
+            }
+
+            if (data.success) {
+                router.push(`/dashboard/shipments/${path.split("/")[3]}/edit`)
+            }
+        } catch (err) {
+            console.log(err)
+        }
     }
 
     /**
@@ -161,12 +211,12 @@ export default function CostingDetail() {
                                                                 readOnly
                                                                 disabled
                                                                 id="amount"
-                                                                value={calculateAmount(costingDetail.price.toString(), costingDetail.currency.toString())}
+                                                                value={calculateAmount(costingDetail.price.toString(), costingDetail.currency.toString(), shipmentQty)}
                                                                 className="no-spinner block min-w-0 grow py-1.5 pr-3 pl-1 text-base text-gray-900 placeholder:text-gray-400 focus:outline-none sm:text-sm/6"
                                                                 placeholder="0.00"
                                                             />
                                                         </div>
-                                                        <p className="mt-1 text-xs text-gray-500">*Price x Currency x Qty</p>
+                                                        <p className="mt-1 text-xs text-gray-500">*Price x Currency x {shipmentQty} (Qty) </p>
                                                     </div>
                                                 </div>
 
@@ -215,11 +265,12 @@ export default function CostingDetail() {
                                                                 id="subCosting"
                                                                 disabled
                                                                 readOnly
-                                                                value={calculateSubCosting(costingDetail.price.toString(), costingDetail.currency.toString(), costingDetail.localFee.toString(), costingDetail.freight.toString())}
+                                                                value={calculateSubCosting(costingDetail.price.toString(), costingDetail.currency.toString(), costingDetail.localFee.toString(), costingDetail.freight.toString(), shipmentQty)}
                                                                 className="no-spinner block min-w-0 grow py-1.5 pr-3 pl-1 text-base text-gray-900 placeholder:text-gray-400 focus:outline-none sm:text-sm/6"
                                                                 placeholder="0.00"
                                                             />
                                                         </div>
+                                                        <p className="mt-1 text-xs text-gray-500">*Amount + Local Fee + Freight</p>
                                                     </div>
                                                 </div>
 
@@ -252,8 +303,8 @@ export default function CostingDetail() {
                                                                         id="vat"
                                                                         name="vat"
                                                                         type="checkbox"
-                                                                        onChange={() => setVat(!vat)}
-                                                                        checked={vat}
+                                                                        onChange={handleChange}
+                                                                        checked={costingDetail.vat}
                                                                         aria-describedby="candidates-description"
                                                                         className="col-start-1 row-start-1 appearance-none rounded-sm border border-gray-300 bg-white checked:border-[#1A5098] checked:bg-[#1A5098] indeterminate:border-[#1A5098] indeterminate:bg-[#1A5098] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1A5098] disabled:border-gray-300 disabled:bg-gray-100 disabled:checked:bg-gray-100 forced-colors:appearance-auto"
                                                                     />
@@ -293,8 +344,8 @@ export default function CostingDetail() {
                                                                         id="incomeTax"
                                                                         name="incomeTax"
                                                                         type="checkbox"
-                                                                        checked={incomeTax}
-                                                                        onChange={() => setIncomeTax(!incomeTax)}
+                                                                        checked={costingDetail.incomeTax}
+                                                                        onChange={handleChange}
                                                                         aria-describedby="candidates-description"
                                                                         className="col-start-1 row-start-1 appearance-none rounded-sm border border-gray-300 bg-white checked:border-[#1A5098] checked:bg-[#1A5098] indeterminate:border-[#1A5098] indeterminate:bg-[#1A5098] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1A5098] disabled:border-gray-300 disabled:bg-gray-100 disabled:checked:bg-gray-100 forced-colors:appearance-auto"
                                                                     />
@@ -339,7 +390,7 @@ export default function CostingDetail() {
                                                                 name="totalcost"
                                                                 id="totalcost"
                                                                 readOnly
-                                                                value={calculateTotalCost(costingDetail.price.toString(), costingDetail.currency.toString(), costingDetail.localFee.toString(), costingDetail.freight.toString(), costingDetail.reimbursement.toString(), costingDetail.vat)}
+                                                                value={calculateTotalCost(costingDetail.price.toString(), costingDetail.currency.toString(), costingDetail.localFee.toString(), costingDetail.freight.toString(), costingDetail.reimbursement.toString(), costingDetail.vat, shipmentQty)}
                                                                 disabled
                                                                 className="no-spinner block min-w-0 grow py-1.5 pr-3 pl-1 text-base text-gray-900 placeholder:text-gray-400 focus:outline-none sm:text-sm/6"
                                                                 placeholder="0.00"
@@ -358,7 +409,7 @@ export default function CostingDetail() {
                                                                 type="text"
                                                                 name="paymentvendor"
                                                                 id="paymentvendor"
-                                                                value={calculatePaymentToVendor(costingDetail.price.toString(), costingDetail.currency.toString(), costingDetail.localFee.toString(), costingDetail.reimbursement.toString(), costingDetail.freight.toString(), costingDetail.vat, costingDetail.incomeTax)}
+                                                                value={calculatePaymentToVendor(costingDetail.price.toString(), costingDetail.currency.toString(), costingDetail.localFee.toString(), costingDetail.reimbursement.toString(), costingDetail.freight.toString(), costingDetail.vat, costingDetail.incomeTax, shipmentQty)}
                                                                 readOnly
                                                                 disabled
                                                                 className="no-spinner block min-w-0 grow py-1.5 pr-3 pl-1 text-base text-gray-900 placeholder:text-gray-400 focus:outline-none sm:text-sm/6"
@@ -387,7 +438,7 @@ export default function CostingDetail() {
                                                     </div>
                                                 </div>
 
-                                                <button type="submit" className="inline-flex w-full justify-center rounded-md bg-[#1A5098] px-3 py-2 text-sm font-medium text-white shadow-xs hover:bg-[#1a5198eb] mt-5 sm:w-auto">Tambah Costing</button>
+                                                <button type="submit" className="inline-flex w-full justify-center rounded-md bg-[#1A5098] px-3 py-2 text-sm font-medium text-white shadow-xs hover:bg-[#1a5198eb] mt-5 sm:w-auto">Edit Costing</button>
                                             </form>
                                         </div>
                                     </div>

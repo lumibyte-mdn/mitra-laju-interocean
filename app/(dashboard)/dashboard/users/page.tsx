@@ -10,7 +10,7 @@ import roles from "@/lib/role";
 
 import { Users } from "@/lib/interface";
 
-import { transformDate } from "@/lib/utils";
+import { titleCase, transformDate } from "@/lib/utils";
 
 
 export default function UserPage() {
@@ -348,7 +348,7 @@ export default function UserPage() {
                                                         <td className="hidden px-3 py-4 text-sm text-gray-500 lg:table-cell">{user.lastName}</td>
                                                         <td className="hidden px-3 py-4 text-sm text-gray-500 sm:table-cell">{user.email}</td>
                                                         <td className="hidden px-3 py-4 text-sm text-gray-500 sm:table-cell">••••••••</td>
-                                                        <td className="px-3 py-4 text-sm text-gray-500">{user.role}</td>
+                                                        <td className="px-3 py-4 text-sm text-gray-500">{titleCase(user.role)}</td>
                                                         <td className="hidden px-3 py-4 text-sm text-gray-500 sm:table-cell">{transformDate(user.createdAt.split("T")[0])}</td>
                                                         <td className="py-4 pr-4 pl-3 text-right text-sm font-medium sm:pr-0">
                                                             <div className="flex items-center space-x-4">

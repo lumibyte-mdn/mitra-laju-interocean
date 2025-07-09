@@ -39,6 +39,26 @@ export default function ShipmentCosting() {
     const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target
 
+        if (name == "vat") {
+            setInput(prev => ({
+                ...prev,
+                [name]: !vat
+            }))
+            setVat(!vat)
+
+            return
+        }
+
+        if (name == "incomeTax") {
+            setInput(prev => ({
+                ...prev,
+                [name]: !incomeTax
+            }))
+            setIncomeTax(!incomeTax)
+
+            return
+        }
+
         setInput(prev => ({
             ...prev,
             [name]: value
@@ -198,7 +218,7 @@ export default function ShipmentCosting() {
                                                                 readOnly
                                                                 disabled
                                                                 id="amount"
-                                                                value={calculateAmount(input.price, input.currency)}
+                                                                value={calculateAmount(input.price, input.currency, shipmentQty)}
                                                                 className="no-spinner block min-w-0 grow py-1.5 pr-3 pl-1 text-base text-gray-900 placeholder:text-gray-400 focus:outline-none sm:text-sm/6"
                                                                 placeholder="0.00"
                                                             />
@@ -250,7 +270,7 @@ export default function ShipmentCosting() {
                                                                 id="subCosting"
                                                                 disabled
                                                                 readOnly
-                                                                value={calculateSubCosting(input.price, input.currency, input.localFee, input.freight)}
+                                                                value={calculateSubCosting(input.price, input.currency, input.localFee, input.freight, shipmentQty)}
                                                                 className="no-spinner block min-w-0 grow py-1.5 pr-3 pl-1 text-base text-gray-900 placeholder:text-gray-400 focus:outline-none sm:text-sm/6"
                                                                 placeholder="0.00"
                                                             />
@@ -286,7 +306,7 @@ export default function ShipmentCosting() {
                                                                         id="vat"
                                                                         name="vat"
                                                                         type="checkbox"
-                                                                        onChange={() => setVat(!vat)}
+                                                                        onChange={handleChange}
                                                                         aria-describedby="candidates-description"
                                                                         className="col-start-1 row-start-1 appearance-none rounded-sm border border-gray-300 bg-white checked:border-[#1A5098] checked:bg-[#1A5098] indeterminate:border-[#1A5098] indeterminate:bg-[#1A5098] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1A5098] disabled:border-gray-300 disabled:bg-gray-100 disabled:checked:bg-gray-100 forced-colors:appearance-auto"
                                                                     />
@@ -326,7 +346,7 @@ export default function ShipmentCosting() {
                                                                         id="incomeTax"
                                                                         name="incomeTax"
                                                                         type="checkbox"
-                                                                        onChange={() => setIncomeTax(!incomeTax)}
+                                                                        onChange={handleChange}
                                                                         aria-describedby="candidates-description"
                                                                         className="col-start-1 row-start-1 appearance-none rounded-sm border border-gray-300 bg-white checked:border-[#1A5098] checked:bg-[#1A5098] indeterminate:border-[#1A5098] indeterminate:bg-[#1A5098] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1A5098] disabled:border-gray-300 disabled:bg-gray-100 disabled:checked:bg-gray-100 forced-colors:appearance-auto"
                                                                     />
@@ -371,7 +391,7 @@ export default function ShipmentCosting() {
                                                                 name="totalcost"
                                                                 id="totalcost"
                                                                 readOnly
-                                                                value={calculateTotalCost(input.price, input.currency, input.localFee, input.freight, input.reimbursement, input.vat)}
+                                                                value={calculateTotalCost(input.price, input.currency, input.localFee, input.freight, input.reimbursement, input.vat, shipmentQty)}
                                                                 disabled
                                                                 className="no-spinner block min-w-0 grow py-1.5 pr-3 pl-1 text-base text-gray-900 placeholder:text-gray-400 focus:outline-none sm:text-sm/6"
                                                                 placeholder="0.00"
@@ -390,7 +410,7 @@ export default function ShipmentCosting() {
                                                                 type="text"
                                                                 name="paymentvendor"
                                                                 id="paymentvendor"
-                                                                value={calculatePaymentToVendor(input.price, input.currency, input.localFee, input.reimbursement, input.freight, input.vat, input.incomeTax)}
+                                                                value={calculatePaymentToVendor(input.price, input.currency, input.localFee, input.reimbursement, input.freight, input.vat, input.incomeTax, shipmentQty)}
                                                                 readOnly
                                                                 disabled
                                                                 className="no-spinner block min-w-0 grow py-1.5 pr-3 pl-1 text-base text-gray-900 placeholder:text-gray-400 focus:outline-none sm:text-sm/6"
@@ -563,7 +583,7 @@ export default function ShipmentCosting() {
                                                                                 </label>
                                                                                 <input
                                                                                     type="text"
-                                                                                    value={`Rp. ${dataCostingTotal(shipmentCosting.subCosting, shipmentCosting.reimbursement, shipmentCosting.vat)}`}
+                                                                                    value={`Rp. ${dataCostingTotal(shipmentCosting.price, shipmentCosting.currency, shipmentQty, shipmentCosting.freight, shipmentCosting.localFee, shipmentCosting.reimbursement, shipmentCosting.vat)}`}
                                                                                     readOnly
                                                                                     className="no-spinner block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 sm:text-sm/6 disabled:text-gray-400 appearance-none"
                                                                                 />
@@ -575,7 +595,7 @@ export default function ShipmentCosting() {
                                                                                 </label>
                                                                                 <input
                                                                                     type="text"
-                                                                                    value={`Rp. ${dataCostingVendorPayment(shipmentCosting.subCosting, shipmentCosting.reimbursement, shipmentCosting.vat, shipmentCosting.incomeTax)}`}
+                                                                                    value={`Rp. ${dataCostingVendorPayment(shipmentCosting.price, shipmentCosting.currency, shipmentQty, shipmentCosting.freight, shipmentCosting.localFee, shipmentCosting.reimbursement, shipmentCosting.vat, shipmentCosting.incomeTax)}`}
                                                                                     readOnly
                                                                                     className="no-spinner block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 sm:text-sm/6 disabled:text-gray-400 appearance-none"
                                                                                 />

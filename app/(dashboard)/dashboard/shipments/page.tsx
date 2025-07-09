@@ -2,10 +2,16 @@
 
 import { Shipment } from "@/lib/interface";
 import { transformDate } from "@/lib/utils";
+
 import { Dialog, DialogBackdrop, DialogPanel, DialogTitle } from "@headlessui/react";
 import { ExclamationTriangleIcon } from "@heroicons/react/16/solid";
+
+import Image from "next/image";
 import Link from "next/link";
+
 import { useEffect, useState } from "react";
+
+import costing from "@/public/svg/costing.svg"
 
 export default function shipment() {
     const [shipments, setShipments] = useState([])
@@ -117,7 +123,7 @@ export default function shipment() {
                                                                 <Link
                                                                     href={`/dashboard/shipments/${shipment.id}/costing/add`}
                                                                 >
-                                                                    Costing
+                                                                    <Image src={costing} width={24} height={24} alt="icon"/>
                                                                 </Link>
                                                                 <Link
                                                                     href={`/dashboard/shipments/${shipment.id}/edit`}
