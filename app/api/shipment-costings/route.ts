@@ -17,5 +17,16 @@ export async function POST(req: NextRequest) {
         }
     })
 
-    return NextResponse.json({ success: true, shipmentCostings }, { status: 200 })
+    const shipmentQty = await prisma.shipments.findUnique({
+        where: {
+            id: parseInt(data.shipmentId)
+        },
+        select: {
+            qty: true
+        }
+    })
+
+    console.log(shipmentQty)
+
+    return NextResponse.json({ success: true, shipmentCostings, shipmentQty }, { status: 200 })
 }

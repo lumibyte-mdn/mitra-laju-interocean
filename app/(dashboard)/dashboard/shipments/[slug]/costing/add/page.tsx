@@ -8,6 +8,7 @@ import { dataCostingTotal, dataCostingVendorPayment, transformDate, calculateAmo
 export default function ShipmentCosting() {
     const path = usePathname()
 
+    const [shipmentQty, setShipmentQty] = useState(0)
     const [shipmentCostings, setShipmentCostings] = useState([])
     const [openIndex, setOpenIndex] = useState<number | null>(null);
 
@@ -23,7 +24,7 @@ export default function ShipmentCosting() {
         freightPaymentDate: "",
         vat: false,
         incomeTax: false,
-        subCosting: 0
+        subCosting: 0,
     })
 
     // Checkbox for taxes
@@ -60,7 +61,7 @@ export default function ShipmentCosting() {
         input['vat'] = vat
         input['shipmentId'] = path.split("/")[3]
         input['incomeTax'] = incomeTax
-        input['subCosting'] = (parseInt(input.price) * parseInt(input.currency)) + parseInt(input.localFee) + parseInt(input.freight)
+        input['subCosting'] = (parseInt(input.price) * parseInt(input.currency) * shipmentQty) + parseInt(input.localFee) + parseInt(input.freight)
 
         try {
             const res = await fetch("/api/costings", {
@@ -103,6 +104,7 @@ export default function ShipmentCosting() {
 
             if (data.success) {
                 setShipmentCostings(data.shipmentCostings)
+                setShipmentQty(data.shipmentQty.qty)
             }
         } catch (err) {
             console.log(err)

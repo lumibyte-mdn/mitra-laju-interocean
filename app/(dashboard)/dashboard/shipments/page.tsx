@@ -66,7 +66,7 @@ export default function shipment() {
                                     </div>
                                     <div className="mt-4 sm:mt-0 sm:ml-4 sm:flex-none">
                                         <Link
-                                            href={"/dashboard/shipment/add"}
+                                            href={"/dashboard/shipments/add"}
                                             type="button"
                                             className="block rounded-md bg-[#1A5098] px-3 py-2 text-center text-sm font-medium text-white shadow-xs hover:bg-[#1a5198eb] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1A5098]"
                                         >

@@ -1,12 +1,15 @@
 "use client"
 
 import { usePathname } from "next/navigation"
-import { ChangeEvent, useState } from "react"
+import { ChangeEvent, useEffect, useState } from "react"
 import { calculateAmount, calculatePaymentToVendor, calculateSubCosting, calculateTotalCost } from "@/lib/utils"
 
 export default function CostingDetail() {
+    const path = usePathname()
+
     const [vat,setVat] = useState(false)
     const [incomeTax, setIncomeTax] = useState(false)
+    const [shipmentQty, setShipmentQty] = useState(0)
 
     const [costingDetail, setCostingDetail] = useState({
         id: 0,
@@ -32,11 +35,45 @@ export default function CostingDetail() {
     }
 
     /**
+     * This function handles the submission of the
+     * costing data edited by the user
      * 
+     * @returns - none
      */
     const handleSubmit = async () => {
 
     }
+
+    /**
+     * This function fetches the costing detail based on
+     * costing id
+     * 
+     * @returns - none
+     */
+    const fetchCostingDetail = async () => {
+        try {
+            const res = await fetch(`/api/costings/${path.split("/")[5]}`)
+            const data = await res.json()
+
+            if (!res.ok) {
+                throw new Error("Failed to fetch data.")
+            }
+
+            if (data.success) {
+                setCostingDetail(data.costingDetail)
+                setVat(data.costingDetail.vat)
+                setIncomeTax(data.costingDetail.incomeTax)
+                setShipmentQty(data.shipmentQty.qty)
+            }
+            
+        } catch (err) {
+            console.log(err)
+        }
+    }
+
+    useEffect(() => {
+        fetchCostingDetail()
+    }, [])
 
     return (
         <>
@@ -72,6 +109,7 @@ export default function CostingDetail() {
                                                             name="vendorName"
                                                             type="text"
                                                             onChange={handleChange}
+                                                            value={costingDetail.vendorName}
                                                             placeholder="Masukkan nama vendor"
                                                             className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-[#1A5098] sm:text-sm/6 disabled:text-gray-400 appearance-none"
                                                         />
@@ -87,6 +125,7 @@ export default function CostingDetail() {
                                                                 name="price"
                                                                 id="price"
                                                                 onChange={handleChange}
+                                                                value={costingDetail.price.toString()}
                                                                 className="no-spinner block min-w-0 grow py-1.5 pr-3 pl-1 text-base text-gray-900 placeholder:text-gray-400 focus:outline-none sm:text-sm/6"
                                                                 placeholder="0.00"
                                                             />
@@ -104,6 +143,7 @@ export default function CostingDetail() {
                                                                 name="currency"
                                                                 id="currency"
                                                                 onChange={handleChange}
+                                                                value={costingDetail.currency.toString()}
                                                                 className="no-spinner block min-w-0 grow py-1.5 pr-3 pl-1 text-base text-gray-900 placeholder:text-gray-400 focus:outline-none sm:text-sm/6"
                                                                 placeholder="0.00" />
                                                         </div>
@@ -139,6 +179,7 @@ export default function CostingDetail() {
                                                                 type="text"
                                                                 name="localFee"
                                                                 onChange={handleChange}
+                                                                value={costingDetail.localFee.toString()}
                                                                 id="localFee"
                                                                 className="no-spinner block min-w-0 grow py-1.5 pr-3 pl-1 text-base text-gray-900 placeholder:text-gray-400 focus:outline-none sm:text-sm/6"
                                                                 placeholder="0.00" />
@@ -156,6 +197,7 @@ export default function CostingDetail() {
                                                                 name="freight"
                                                                 id="freight"
                                                                 onChange={handleChange}
+                                                                value={costingDetail.freight.toString()}
                                                                 className="no-spinner block min-w-0 grow py-1.5 pr-3 pl-1 text-base text-gray-900 placeholder:text-gray-400 focus:outline-none sm:text-sm/6"
                                                                 placeholder="0.00" />
                                                         </div>
@@ -191,6 +233,7 @@ export default function CostingDetail() {
                                                                 name="reimbursement"
                                                                 id="reimbursement"
                                                                 onChange={handleChange}
+                                                                value={costingDetail.reimbursement.toString()}
                                                                 className="no-spinner block min-w-0 grow py-1.5 pr-3 pl-1 text-base text-gray-900 placeholder:text-gray-400 focus:outline-none sm:text-sm/6"
                                                                 placeholder="0.00" />
                                                         </div>
@@ -210,6 +253,7 @@ export default function CostingDetail() {
                                                                         name="vat"
                                                                         type="checkbox"
                                                                         onChange={() => setVat(!vat)}
+                                                                        checked={vat}
                                                                         aria-describedby="candidates-description"
                                                                         className="col-start-1 row-start-1 appearance-none rounded-sm border border-gray-300 bg-white checked:border-[#1A5098] checked:bg-[#1A5098] indeterminate:border-[#1A5098] indeterminate:bg-[#1A5098] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1A5098] disabled:border-gray-300 disabled:bg-gray-100 disabled:checked:bg-gray-100 forced-colors:appearance-auto"
                                                                     />
@@ -249,6 +293,7 @@ export default function CostingDetail() {
                                                                         id="incomeTax"
                                                                         name="incomeTax"
                                                                         type="checkbox"
+                                                                        checked={incomeTax}
                                                                         onChange={() => setIncomeTax(!incomeTax)}
                                                                         aria-describedby="candidates-description"
                                                                         className="col-start-1 row-start-1 appearance-none rounded-sm border border-gray-300 bg-white checked:border-[#1A5098] checked:bg-[#1A5098] indeterminate:border-[#1A5098] indeterminate:bg-[#1A5098] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1A5098] disabled:border-gray-300 disabled:bg-gray-100 disabled:checked:bg-gray-100 forced-colors:appearance-auto"
@@ -336,6 +381,7 @@ export default function CostingDetail() {
                                                             name="freightPaymentDate"
                                                             onChange={handleChange}
                                                             type="date"
+                                                            value={costingDetail.freightPaymentDate.split("T")[0]}
                                                             className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-[#1A5098] sm:text-sm/6 disabled:text-gray-400 appearance-none"
                                                         />
                                                     </div>
