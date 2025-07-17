@@ -14,68 +14,33 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Users {
-  id            Int          @id @default(autoincrement())
-  clerkId       String       @unique
-  firstName     String
-  lastName      String?
-  email         String
-  createdAt     DateTime     @default(now())
-
-  role          UserRole
+model PortLocations {
+  id            String          @id @default(uuid())
+  portName      String          
+  country       String
+  isActive      Boolean         @default(true)
+  createdAt     DateTime
+  updatedAt     DateTime?
+  createdBy     String
+  updatedBy     String?
 }
 
-model Shipments {
-  id                    Int          @id @default(autoincrement())
-
-  orderNumber           String       @unique
-  customer              String
-  shipper               String
-  dueDate               DateTime
-
-  customerCode          String
-  qty                   Int
-  size                  String
-  origin                String
-  destination           String
-  shipmentType          ShipmentType
-  estimatedDate         DateTime
-  containerNumber       String
-  bookingNumber         String
-
-  costing               Costings[]
+model Vessels {
+  id              String          @id @default(uuid())
+  vesselName      String
+  voyage          String
+  etd             DateTime
+  cutOffDate      DateTime?
+  isActive        Boolean
+  createdAt       DateTime
+  updatedAt       DateTime?
+  createdBy       String
+  updatedBy       String?
 }
 
-model Costings {
-  id                    Int           @id @default(autoincrement())
-
-  shipmentId            Int
-  shipment              Shipments     @relation(fields: [shipmentId], references: [id])
-
-  vendorName            String
-  price                 Int
-  currency              Int
-
-  localFee              Int
-  freight               Int
-
-  subCosting            Int
-
-  reimbursement         Int
-
-  vat                   Boolean
-  incomeTax             Boolean
-
-  freightPaymentDate    DateTime
-}
-
-enum UserRole {
-  ADMIN
-  KARYAWAN
-}
-
-enum ShipmentType {
-  DOMESTIC
-  EXPORT
-  IMPORT
+model Customers {
+  id                      String          @id @default(uuid())
+  customerCode            String
+  customerName            String
+  customerType            String
 }
