@@ -1,13 +1,50 @@
-const people = [
-  { name: 'Lindsay Walton', title: 'Front-end Developer', email: 'lindsay.walton@example.com', role: 'Member' },
-  // More people...
-]
+"use client"
 
 import Link from "next/link"
+import { useEffect, useState } from "react"
+
+import { Port } from "@/lib/interface"
+import { transformDate } from "@/lib/utils"
+import Timeout from "@/components/timeout"
 
 export default function PortLocations() {
+    const [ ports, setPorts ] = useState([])
+
+    const [ isLoading, setIsLoading ] = useState<boolean>(true)
+    const [ visible, setVisible ] = useState<boolean>(false)
+
+    /**
+     * Fetch all of the ports data from database and
+     * display it to the user.
+     *
+     * API: GET /api/port-locations
+     */
+    const fetchPorts = async () => {
+        try {
+            const res = await fetch("/api/port-locations")
+            const data = await res.json()
+
+            if (!res.ok) {
+                throw new Error("Failed to fetch data.")
+            }
+
+            if (data.success) {
+                setPorts(data.ports)
+            }
+        } catch (err) {
+            setVisible(true)
+            setIsLoading(false)
+        }
+    }
+
+    useEffect(() => {
+        fetchPorts()
+    }, [])
+
     return (
         <>
+            {Timeout(visible, "Failed to fetch data!", "Please try to refresh your browser. This happens due to poor internet connection.")}
+
             <div className="px-4 sm:px-6 lg:px-8">
                 <div className="sm:flex sm:items-center">
                     <div className="sm:flex-auto">
@@ -49,18 +86,18 @@ export default function PortLocations() {
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-200">
-                                {people.map((person) => (
-                                <tr key={person.email}>
+                                {ports.map((port: Port, index) => (
+                                <tr key={index}>
                                     <td className="py-4 pr-3 pl-4 text-sm font-medium whitespace-nowrap text-gray-900 sm:pl-0">
-                                    {person.name}
+                                        {port.portName}
                                     </td>
-                                    <td className="px-3 py-4 text-sm whitespace-nowrap text-gray-500">{person.title}</td>
-                                    <td className="px-3 py-4 text-sm whitespace-nowrap text-gray-500">{person.email}</td>
-                                    <td className="px-3 py-4 text-sm whitespace-nowrap text-gray-500">{person.role}</td>
+                                    <td className="px-3 py-4 text-sm whitespace-nowrap text-gray-500">{port.country}</td>
+                                    <td className="px-3 py-4 text-sm whitespace-nowrap text-gray-500">{transformDate(port.createdAt?.split("T")[0] as string)}</td>
+                                    <td className="px-3 py-4 text-sm whitespace-nowrap text-gray-500">{port.isActive ? "Active" : "Inactive"}</td>
                                     <td className="relative py-4 pr-4 pl-3 text-right text-sm font-medium whitespace-nowrap sm:pr-0">
-                                    <a href="#" className="text-indigo-600 hover:text-indigo-900">
-                                        Edit<span className="sr-only">, {person.name}</span>
-                                    </a>
+                                    <Link href={`/dashboard/modules/port-locations/${port.id}`} className="text-indigo-600 hover:text-indigo-900">
+                                        Edit<span className="sr-only"></span>
+                                    </Link>
                                     </td>
                                 </tr>
                                 ))}

@@ -1,45 +1,35 @@
-export interface Users {
-    id: number;
-    clerkId: string;
-    firstName: string;
-    lastName: string;
-    email: string;
-    createdAt: string;
-    role: string;
+export interface PortForm {
+    portName: string;
+    country: string;
 }
 
-export interface Costing {
-    id: number;
-    vendorName: string;
-    price: number;
-    currency: number;
-    localFee: number;
-    freight: number;
-    subCosting: number;
-    reimbursement: number;
-    vat: boolean;
-    incomeTax: boolean;
-    freightPaymentDate: string;
+export interface Port {
+    id: string;
+    portName: string;
+    country: string;
+    isActive: boolean;
+    createdAt?: string;
+    updatedAt?: string;
+    createdBy?: string;
+    updatedBy?: string
 }
 
-export interface Shipment {
-    id: number;
-    orderNumber: string;
-    customer: string;
-    shipper: string;
-    dueDate: string;
-    customerCode: string;
-    qty: number;
-    size: string;
-    origin: string;
-    destination: string;
-    shipmentType: string;
-    estimatedDate: string;
-    containerNumber: string;
-    bookingNumber: string;
+export interface VesselForm {
+    vesselName: string;
+    voyage: string;
+    etd: string;
+    cutOffDate: string;
 }
 
-export enum UserRole {
-    KARYAWAN = "KARYAWAN",
-    ADMIN = "ADMIN"
+export interface Vessel {
+    id: string;
+    vesselName: string;
+    voyage: string;
+    etd: string;
+    cutOffDate: string;
+    isActive: boolean;
+    createdAt?: string;
+    updatedAt?: string;
+    createdBy?: string;
+    updatedBy?: string;
 }

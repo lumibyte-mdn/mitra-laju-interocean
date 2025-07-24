@@ -1,13 +1,43 @@
-const people = [
-  { name: 'Lindsay Walton', title: 'Front-end Developer', email: 'lindsay.walton@example.com', role: 'Member' },
-  // More people...
-]
+"use client"
 
+import Timeout from "@/components/timeout"
+import { Vessel } from "@/lib/interface"
+import { transformDate } from "@/lib/utils"
 import Link from "next/link"
+import { useEffect, useState } from "react"
 
 export default function Vessels() {
+    const [ vessels, setVessels ] = useState<Vessel[]>([])
+
+    const [ isLoading, setIsLoading ] = useState<boolean>(true)
+    const [ visible, setVisible ] = useState<boolean>(false)
+
+    const fetchVessels = async () => {
+        try {
+            const res = await fetch("/api/vessels")
+            const data = await res.json()
+
+            if (!res.ok) {
+                throw new Error("Failed to fetch data.")
+            }
+
+            if (data.success) {
+                setVessels(data.vessels)
+            }
+        } catch (err) {
+            setVisible(true)
+            setIsLoading(false)
+        }
+    }
+
+    useEffect(() => {
+        fetchVessels()
+    }, [])
+
     return (
         <>
+            {Timeout(visible, "Failed to fetch data!", "Please try to refresh your browser. This happens due to poor internet connection.")}
+
             <div className="px-4 sm:px-6 lg:px-8">
                 <div className="sm:flex sm:items-center">
                     <div className="sm:flex-auto">
@@ -49,18 +79,18 @@ export default function Vessels() {
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-200">
-                                {people.map((person) => (
-                                <tr key={person.email}>
+                                {vessels.map((vessel: Vessel, index) => (
+                                <tr key={index}>
                                     <td className="py-4 pr-3 pl-4 text-sm font-medium whitespace-nowrap text-gray-900 sm:pl-0">
-                                    {person.name}
+                                    {vessel.vesselName}
                                     </td>
-                                    <td className="px-3 py-4 text-sm whitespace-nowrap text-gray-500">{person.title}</td>
-                                    <td className="px-3 py-4 text-sm whitespace-nowrap text-gray-500">{person.email}</td>
-                                    <td className="px-3 py-4 text-sm whitespace-nowrap text-gray-500">{person.role}</td>
+                                    <td className="px-3 py-4 text-sm whitespace-nowrap text-gray-500">{vessel.voyage}</td>
+                                    <td className="px-3 py-4 text-sm whitespace-nowrap text-gray-500">{transformDate(vessel.etd.split("T")[0])}</td>
+                                    <td className="px-3 py-4 text-sm whitespace-nowrap text-gray-500">{vessel.isActive ? "Active" : "Inactive"}</td>
                                     <td className="relative py-4 pr-4 pl-3 text-right text-sm font-medium whitespace-nowrap sm:pr-0">
-                                    <a href="#" className="text-indigo-600 hover:text-indigo-900">
-                                        Edit<span className="sr-only">, {person.name}</span>
-                                    </a>
+                                    <Link href={`/dashboard/modules/vessels/${vessel.id}`} className="text-indigo-600 hover:text-indigo-900">
+                                        Edit<span className="sr-only"></span>
+                                    </Link>
                                     </td>
                                 </tr>
                                 ))}

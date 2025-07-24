@@ -16,10 +16,10 @@ datasource db {
 
 model PortLocations {
   id            String          @id @default(uuid())
-  portName      String          
+  portName      String
   country       String
   isActive      Boolean         @default(true)
-  createdAt     DateTime
+  createdAt     DateTime        @default(now())
   updatedAt     DateTime?
   createdBy     String
   updatedBy     String?
@@ -31,16 +31,9 @@ model Vessels {
   voyage          String
   etd             DateTime
   cutOffDate      DateTime?
-  isActive        Boolean
-  createdAt       DateTime
+  isActive        Boolean         @default(true)
+  createdAt       DateTime        @default(now())
   updatedAt       DateTime?
   createdBy       String
   updatedBy       String?
-}
-
-model Customers {
-  id                      String          @id @default(uuid())
-  customerCode            String
-  customerName            String
-  customerType            String
 }
