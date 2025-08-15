@@ -17,8 +17,6 @@ export interface Port {
 export interface VesselForm {
     vesselName: string;
     voyage: string;
-    etd: string;
-    cutOffDate: string;
 }
 
 export interface Vessel {

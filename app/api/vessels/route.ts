@@ -15,8 +15,8 @@ export async function POST(req: Response) {
         data: {
             vesselName: data.get("vesselName") as string,
             voyage: data.get("voyage") as string,
-            etd: data.get("etd") + "T00:00:00.000Z",
-            cutOffDate: data.get("cutOffDate") == null ? null : data.get("cutOffDate") + "T00:00:00.000Z",
+            etd: data.get("etd") == "" ? null : data.get("etd") + "T00:00:00.000Z",
+            cutOffDate: data.get("cutOffDate") == "" ? null : data.get("cutOffDate") + "T00:00:00.000Z",
             createdBy: `${user?.firstName} ${user?.lastName}`
         }
     })

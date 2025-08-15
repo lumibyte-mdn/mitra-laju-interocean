@@ -15,25 +15,71 @@ datasource db {
 }
 
 model PortLocations {
-  id            String          @id @default(uuid())
-  portName      String
-  country       String
-  isActive      Boolean         @default(true)
-  createdAt     DateTime        @default(now())
-  updatedAt     DateTime?
-  createdBy     String
-  updatedBy     String?
+  id                      String          @id @default(uuid())
+  portName                String
+  country                 String
+  isActive                Boolean         @default(true)
+  createdAt               DateTime        @default(now())
+  updatedAt               DateTime?
+  createdBy               String
+  updatedBy               String?
+
+  customerUnloading       CustomerUnloading[]
+  customerLoading         CustomerLoading[]
 }
 
 model Vessels {
   id              String          @id @default(uuid())
   vesselName      String
   voyage          String
-  etd             DateTime
+  etd             DateTime?
   cutOffDate      DateTime?
   isActive        Boolean         @default(true)
   createdAt       DateTime        @default(now())
   updatedAt       DateTime?
   createdBy       String
   updatedBy       String?
+}
+
+model Customer {
+  id                          String          @id @default(uuid())
+  customerCode                String        
+  customerName                String
+  npwpNumber                  String?
+  isActive                    Boolean         @default(true)
+  createdAt                   DateTime        @default(now())
+  updatedAt                   DateTime?
+  createdBy                   String
+  updatedBy                   String?
+
+  customerUnloading           CustomerUnloading[]
+  customerLoading             CustomerLoading[]
+}
+
+model CustomerLoading {
+  id              String          @id @default(uuid())
+  portId          String
+  port            PortLocations   @relation(fields: [portId], references: [id])
+  customerId      String
+  customer        Customer        @relation(fields: [customerId], references: [id])
+
+  isActive                    Boolean         @default(true)
+  createdAt                   DateTime        @default(now())
+  updatedAt                   DateTime?
+  createdBy                   String
+  updatedBy                   String?
+}
+
+model CustomerUnloading {
+  id              String          @id @default(uuid())
+  portId          String
+  port            PortLocations   @relation(fields: [portId], references: [id])
+  customerId      String
+  customer        Customer        @relation(fields: [customerId], references: [id])
+
+  isActive                    Boolean         @default(true)
+  createdAt                   DateTime        @default(now())
+  updatedAt                   DateTime?
+  createdBy                   String
+  updatedBy                   String?
 }

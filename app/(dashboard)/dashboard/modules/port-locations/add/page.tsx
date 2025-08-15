@@ -1,25 +1,19 @@
 "use client"
 
-import { PortFormValidation } from "@/lib/validation"
-import { PortForm } from "@/lib/interface"
+import { validatePortForm } from "@/lib/formValidation"
 
 import clsx from "clsx"
 
 import { useRouter } from "next/navigation"
 import { FormEvent, useState } from "react"
-import Timeout from "@/components/timeout"
+import { fetchAPI } from "@/lib/apiClient"
 
 export default function AddPortLocation() {
     const router = useRouter()
 
     const [ isLoading, setIsLoading ] = useState<boolean>(false)
 
-    const [ visible, setVisible ] = useState<boolean>(false)
-
-    const [ error, setError ] = useState<PortForm>({
-        portName: "",
-        country: ""
-    })
+    const [ errors, setErrors ] = useState<Record<string, string>>({})
 
     /**
      * Submitting the new port location input by
@@ -38,39 +32,25 @@ export default function AddPortLocation() {
 
         const formData = new FormData(e.currentTarget)
 
-        // Validates the form before sending it to the backend
-        const validate = PortFormValidation(formData)
+        const { valid, errors } = validatePortForm(formData)
 
-        if (!validate[1]) {
-            setError(validate[0] as PortForm)
+        if (!valid) {
+            setErrors(errors)
             setIsLoading(false)
             return
         }
+        
+        const data = await fetchAPI("/api/port-locations", "POST", formData)
 
-        try {
-            const res = await fetch("/api/port-locations", {
-                method: "POST",
-                body: formData
-            })
-            const data = await res.json()
-
-            if (!res.ok) {
-                throw new Error("Failed to submit data.")
-            }
-
-            if (data.success) {
-                router.push("/dashboard/modules/port-locations")
-            }
-        } catch (err) {
-            setVisible(true)
-            setIsLoading(false)
+        if (data.success) {
+            router.push("/dashboard/modules/port-locations")
         }
+
+        setIsLoading(false)
     }
 
     return (
         <>
-            {Timeout(visible, "Failed to submit data!", "Please re-submit your form. This happens due to poor internet connection.")}
-
             <div className="px-4 sm:px-0">
                 <h3 className="text-base/7 font-semibold text-gray-900">Port Location Information</h3>
                 <p className="mt-1 max-w-2xl text-sm/6 text-gray-500">Create new port location details.</p>
@@ -81,15 +61,15 @@ export default function AddPortLocation() {
                         <div className="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
                             <dt className="text-sm/6 font-medium text-gray-900">Port Name</dt>
                             <dd className="mt-1 text-sm/6 text-gray-700 sm:col-span-2 sm:mt-0">
-                                <input type="text" name="portName" className={clsx("block rounded-md bg-white px-3 py-1.5 text-base text-gray-900 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6 border", error.portName != "" ? "border-red-500" : "border-gray-300") }placeholder="Belawan" />
-                                { error.portName && <p className="text-red-500 text-xs mt-1">{error.portName}</p> }
+                                <input type="text" name="portName" className={clsx("block rounded-md bg-white px-3 py-1.5 text-base text-gray-900 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6 border", errors.portName === undefined ? "border-gray-300" : "border-red-500") }placeholder="Belawan" />
+                                { errors.portName && <p className="text-red-500 text-xs mt-1">{errors.portName}</p> }
                             </dd>
                         </div>
                         <div className="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
                             <dt className="text-sm/6 font-medium text-gray-900">Country</dt>
                             <dd className="mt-1 text-sm/6 text-gray-700 sm:col-span-2 sm:mt-0">
-                                <input type="text" name="country" className={clsx("block rounded-md bg-white px-3 py-1.5 text-base text-gray-900 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6 border", error.country != "" ? "border-red-500" : "border-gray-300")} placeholder="Indonesia" />
-                                { error.country && <p className="text-red-500 text-xs mt-1">{error.country}</p> }
+                                <input type="text" name="country" className={clsx("block rounded-md bg-white px-3 py-1.5 text-base text-gray-900 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6 border", errors.country === undefined ? "border-gray-300" : "border-red-500")} placeholder="Indonesia" />
+                                { errors.country && <p className="text-red-500 text-xs mt-1">{errors.country}</p> }
                             </dd>
                         </div>
                     </dl>

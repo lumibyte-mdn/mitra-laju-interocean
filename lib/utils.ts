@@ -6,11 +6,22 @@
  * @returns 
  */
 export function transformDate(date: string): string {
-    const months = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Oct", "Nov", "Dec"]
+    const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
     
     const [year, month, day] = date.split("-")
 
     return `${months[parseInt(month) - 1]} ${day}, ${year}`
+}
+
+/**
+ * To get current date and time
+ * 
+ * @returns - string of ISOString
+ */
+export function currentDateTime() {
+    const d = new Date()
+
+    return `${d.getFullYear()}-${d.getMonth() < 10 ? "0" + (d.getMonth() + 1) : d.getMonth()}-${d.getDate()}T${d.toISOString().split("T")[1]}`
 }
 
 /**
