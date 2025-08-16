@@ -1,8 +1,5 @@
 "use client"
 
-import Timeout from "@/components/timeout"
-
-import { VesselForm } from "@/lib/interface"
 import { validateVesselForm } from "@/lib/formValidation"
 
 import { FormEvent, useState } from "react"
@@ -62,14 +59,14 @@ export default function AddVessel() {
                         <div className="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
                             <dt className="text-sm/6 font-medium text-gray-900">Vessel Name</dt>
                             <dd className="mt-1 text-sm/6 text-gray-700 sm:col-span-2 sm:mt-0">
-                                <input type="text" name="vesselName" className={clsx("block rounded-md bg-white px-3 py-1.5 text-base text-gray-900 border placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6", errors.vesselName != "" ? "border-red-500" : "border-gray-300")} placeholder="Mitra Laju" />
+                                <input type="text" name="vesselName" className={clsx("block rounded-md bg-white px-3 py-1.5 text-base text-gray-900 border placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6", errors.vesselName === undefined ? "border-gray-300" : "border-red-500")} placeholder="Mitra Laju" />
                                 { errors.vesselName && <p className="text-red-500 mt-1 text-xs">{errors.vesselName}</p> }
                             </dd>
                         </div>
                         <div className="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
                             <dt className="text-sm/6 font-medium text-gray-900">Voyage</dt>
                             <dd className="mt-1 text-sm/6 text-gray-700 sm:col-span-2 sm:mt-0">
-                                <input type="text" name="voyage" className={clsx("block rounded-md bg-white px-3 py-1.5 text-base text-gray-900 border placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6", errors.voyage != "" ? "border-red-500" : "border-gray-300")} placeholder="123A" />
+                                <input type="text" name="voyage" className={clsx("block rounded-md bg-white px-3 py-1.5 text-base text-gray-900 border placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6", errors.voyage === undefined ? "border-gray-300" : "border-red-500")} placeholder="123A" />
                                 { errors.voyage && <p className="text-red-500 mt-1 text-xs">{errors.voyage}</p> }
                             </dd>
                         </div>

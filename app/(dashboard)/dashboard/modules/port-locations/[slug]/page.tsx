@@ -3,6 +3,7 @@
 import { fetchAPI } from "@/lib/apiClient"
 import { validatePortForm } from "@/lib/formValidation"
 import { Port } from "@/lib/interface"
+import clsx from "clsx"
 import { usePathname, useRouter } from "next/navigation"
 import { ChangeEvent, FormEvent, useEffect, useState } from "react"
 
@@ -59,6 +60,8 @@ export default function PortLocationDetails() {
 
         const data = await fetchAPI(`/api/port-locations/${path.split("/")[4]}`, "PUT", formData)
 
+        console.log(data.status)
+
         if (data.success) {
             router.push("/dashboard/modules/port-locations")
         }
@@ -81,25 +84,26 @@ export default function PortLocationDetails() {
                     <dl className="divide-y divide-gray-100">
                         <div className="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
                             <dt className="text-sm/6 font-medium text-gray-900">Port Name</dt>
-                            <dd className="mt-1 text-sm/6 text-gray-700 sm:col-span-2 sm:mt-0">
                             {
                                 isLoadingDetails ?
                                 <Skeleton width={200} />
                                 :
-                                <input type="text" name="portName" className="block rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" placeholder="Belawan" value={portDetail.portName} onChange={handleChange}/>
+                                <dd className="mt-1 text-sm/6 text-gray-700 sm:col-span-2 sm:mt-0">
+                                    <input type="text" name="portName" className={clsx("block rounded-md bg-white px-3 py-1.5 text-base text-gray-900 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6 border", errors.portName === undefined ? "border-gray-300" : "border-red-500") } placeholder="Belawan" value={portDetail.portName} onChange={handleChange}/>
+                                </dd>
                             }
-                            </dd>
                         </div>
                         <div className="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
                             <dt className="text-sm/6 font-medium text-gray-900">Country</dt>
-                            <dd className="mt-1 text-sm/6 text-gray-700 sm:col-span-2 sm:mt-0">
-                                {
-                                    isLoadingDetails ?
-                                    <Skeleton width={200} />
-                                    :
-                                    <input type="text" name="country" className="block rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" placeholder="Indonesia" value={portDetail.country} onChange={handleChange}/>
-                                }
-                            </dd>
+                            {
+                                isLoadingDetails ?
+                                <Skeleton width={200} />
+                                :
+                                <dd className="mt-1 text-sm/6 text-gray-700 sm:col-span-2 sm:mt-0">
+                                    <input type="text" name="country" className={clsx("block rounded-md bg-white px-3 py-1.5 text-base text-gray-900 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6 border", errors.country === undefined ? "border-gray-300" : "border-red-500")} placeholder="Indonesia" value={portDetail.country} onChange={handleChange}/>
+                                    { errors.country && <p className="text-red-500 text-xs mt-1">{errors.country}</p> }
+                                </dd>
+                            }
                         </div>
                     </dl>
 
